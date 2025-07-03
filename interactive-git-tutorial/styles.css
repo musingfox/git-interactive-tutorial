@@ -938,3 +938,138 @@ body {
     0% { opacity: 0; }
     100% { opacity: 1; }
 }
+
+/* 改善成功訊息顯示系統 */
+.message-notification {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    max-width: 500px;
+    width: 90%;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.message-notification.show {
+    top: 20px;
+    opacity: 1;
+}
+
+.message-notification.hide {
+    top: -100px;
+    opacity: 0;
+}
+
+.message-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid;
+    position: relative;
+    overflow: hidden;
+}
+
+.success-message .message-content {
+    background: rgba(76, 175, 80, 0.95);
+    border-color: #4CAF50;
+    color: white;
+}
+
+.error-message .message-content {
+    background: rgba(244, 67, 54, 0.95);
+    border-color: #f44336;
+    color: white;
+}
+
+.info-message .message-content {
+    background: rgba(33, 150, 243, 0.95);
+    border-color: #2196F3;
+    color: white;
+}
+
+.message-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.message-text {
+    flex: 1;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.message-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.message-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 慶祝粒子效果 */
+.celebration-particle {
+    position: fixed;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    background: #FFD700;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    animation: celebration-fall 2s ease-out forwards;
+}
+
+.celebration-particle:nth-child(odd) {
+    background: #FF6B6B;
+}
+
+.celebration-particle:nth-child(3n) {
+    background: #4ECDC4;
+}
+
+@keyframes celebration-fall {
+    0% {
+        opacity: 1;
+        transform: translateY(-20px) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+/* 成功訊息額外動畫 */
+.success-message .message-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: success-shine 2s ease-in-out;
+}
+
+@keyframes success-shine {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}

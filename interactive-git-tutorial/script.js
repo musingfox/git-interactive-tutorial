@@ -969,36 +969,82 @@ class GitLearningPlatform {
 
     // 輔助方法
     showMessage(text, type = 'info') {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `${type}-message`;
-        messageDiv.innerHTML = `<i class="fas fa-${this.getIconForType(type)}"></i> ${text}`;
+        // 移除現有的訊息
+        this.clearExistingMessages();
         
-        // 找到當前活動的課程內容
-        const activeLesson = document.querySelector('.lesson-content.active');
-        if (activeLesson) {
-            const existingMessage = activeLesson.querySelector('.success-message, .error-message, .info-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-            
-            activeLesson.insertBefore(messageDiv, activeLesson.firstChild);
-            
-            // 3秒後自動移除
+        // 創建新的訊息元素
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-notification ${type}-message`;
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <i class="message-icon">${this.getIconForType(type)}</i>
+                <span class="message-text">${text}</span>
+                <button class="message-close" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        
+        // 添加到頁面頂部
+        document.body.appendChild(messageDiv);
+        
+        // 動畫進入
+        setTimeout(() => {
+            messageDiv.classList.add('show');
+        }, 100);
+        
+        // 自動移除（成功訊息5秒，錯誤訊息7秒，資訊訊息4秒）
+        const duration = type === 'error' ? 7000 : type === 'success' ? 5000 : 4000;
+        setTimeout(() => {
+            this.hideMessage(messageDiv);
+        }, duration);
+        
+        // 如果是成功訊息，添加慶祝效果
+        if (type === 'success') {
+            this.addCelebrationEffect();
+        }
+    }
+
+    clearExistingMessages() {
+        const existingMessages = document.querySelectorAll('.message-notification');
+        existingMessages.forEach(msg => this.hideMessage(msg));
+    }
+
+    hideMessage(messageDiv) {
+        if (messageDiv && messageDiv.parentNode) {
+            messageDiv.classList.add('hide');
             setTimeout(() => {
                 if (messageDiv.parentNode) {
                     messageDiv.remove();
                 }
-            }, 3000);
+            }, 300);
+        }
+    }
+
+    addCelebrationEffect() {
+        // 創建慶祝粒子效果
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                const particle = document.createElement('div');
+                particle.className = 'celebration-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, 2000);
+            }, i * 100);
         }
     }
 
     getIconForType(type) {
         const icons = {
-            'success': 'check-circle',
-            'error': 'exclamation-triangle',
-            'info': 'info-circle'
+            'success': '✅',
+            'error': '❌',
+            'info': 'ℹ️'
         };
-        return icons[type] || 'info-circle';
+        return icons[type] || 'ℹ️';
     }
 
     // 課程導航
