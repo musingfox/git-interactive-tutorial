@@ -967,6 +967,141 @@ class GitLearningPlatform {
         this.showMessage('合併模擬器已準備就緒！', 'info');
     }
 
+    // 分支練習遊戲系統
+    startBranchMission(missionNumber) {
+        this.currentMission = missionNumber;
+        
+        switch(missionNumber) {
+            case 1:
+                this.missionCreateBranch();
+                break;
+            case 2:
+                this.missionSwitchBranch();
+                break;
+            case 3:
+                this.missionDevelopOnBranch();
+                break;
+            case 4:
+                this.missionMergeBranch();
+                break;
+        }
+    }
+
+    missionCreateBranch() {
+        this.showMessage('任務開始！請點擊「建立新分支」按鈕來創建 feature/login 分支', 'info');
+        
+        // 監聽分支創建
+        const originalCreate = this.createBranch.bind(this);
+        this.createBranch = () => {
+            originalCreate();
+            this.completeMission(1);
+            this.createBranch = originalCreate; // 還原原始函數
+        };
+    }
+
+    missionSwitchBranch() {
+        this.showMessage('很好！現在請點擊「切換分支」按鈕來切換到 feature/login 分支', 'info');
+        
+        const originalSwitch = this.switchBranch.bind(this);
+        this.switchBranch = () => {
+            originalSwitch();
+            this.completeMission(2);
+            this.switchBranch = originalSwitch;
+        };
+    }
+
+    missionDevelopOnBranch() {
+        this.showMessage('太棒了！現在請點擊「在分支上提交」按鈕來開發登入功能', 'info');
+        
+        const originalCommit = this.makeBranchCommit.bind(this);
+        this.makeBranchCommit = () => {
+            originalCommit();
+            this.completeMission(3);
+            this.makeBranchCommit = originalCommit;
+        };
+    }
+
+    missionMergeBranch() {
+        this.showMessage('最後一步！模擬合併分支操作', 'info');
+        
+        // 創建合併按鈕
+        const missionDiv = document.getElementById('mission4');
+        const existingButton = missionDiv.querySelector('.mission-button');
+        existingButton.style.display = 'none';
+        
+        const mergeButton = document.createElement('button');
+        mergeButton.className = 'mission-button merge-button';
+        mergeButton.textContent = '合併分支';
+        mergeButton.onclick = () => {
+            this.simulateMerge();
+            this.completeMission(4);
+        };
+        
+        missionDiv.appendChild(mergeButton);
+    }
+
+    simulateMerge() {
+        this.showMessage('正在合併 feature/login 分支...', 'info');
+        
+        setTimeout(() => {
+            this.showMessage('合併成功！feature/login 分支的功能已整合到主分支', 'success');
+            this.updateBranchDiagram('merged');
+        }, 1500);
+    }
+
+    completeMission(missionNumber) {
+        // 標記任務完成
+        const missionDiv = document.getElementById(`mission${missionNumber}`);
+        missionDiv.classList.add('mission-completed');
+        
+        const button = missionDiv.querySelector('.mission-button');
+        button.textContent = '✓ 已完成';
+        button.disabled = true;
+        
+        // 顯示下一個任務
+        if (missionNumber < 4) {
+            const nextMission = document.getElementById(`mission${missionNumber + 1}`);
+            nextMission.classList.remove('hidden');
+            nextMission.classList.add('mission-appear');
+        }
+        
+        // 更新進度
+        this.updateMissionProgress(missionNumber);
+        
+        // 成功訊息
+        this.showMessage(`任務 ${missionNumber} 完成！`, 'success');
+        
+        // 如果全部完成
+        if (missionNumber === 4) {
+            setTimeout(() => {
+                this.showMessage('🎉 恭喜！你已經掌握了 Git 分支的基本操作！', 'success');
+            }, 2000);
+        }
+    }
+
+    updateMissionProgress(completedMissions) {
+        const progressFill = document.getElementById('missionProgressFill');
+        const progressText = document.getElementById('missionProgressText');
+        
+        if (progressFill && progressText) {
+            const progress = (completedMissions / 4) * 100;
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `${completedMissions}/4 任務完成`;
+            
+            // 動畫效果
+            progressFill.style.transition = 'width 0.5s ease';
+        }
+    }
+
+    updateBranchDiagram(state) {
+        // 更新分支圖表狀態
+        const diagram = document.getElementById('branchDiagram');
+        if (diagram && state === 'merged') {
+            // 添加合併視覺效果
+            diagram.classList.add('merged-state');
+        }
+    }
+
     // 輔助方法
     showMessage(text, type = 'info') {
         // 移除現有的訊息
@@ -1167,6 +1302,14 @@ function makeBranchCommit() {
     const platform = window.gitPlatform;
     if (platform) {
         platform.makeBranchCommit();
+    }
+}
+
+// 分支練習遊戲函數
+function startBranchMission(missionNumber) {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.startBranchMission(missionNumber);
     }
 }
 

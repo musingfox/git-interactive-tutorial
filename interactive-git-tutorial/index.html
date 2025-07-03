@@ -262,11 +262,32 @@
                     <h3>🎮 分支練習遊戲</h3>
                     <p>完成下面的任務來練習分支操作：</p>
                     <div class="mission-board" id="missionBoard">
-                        <div class="mission">
+                        <div class="mission" id="mission1">
                             <h4>任務 1: 建立功能分支</h4>
                             <p>為新功能建立一個名為 'feature/login' 的分支</p>
-                            <button class="mission-button">開始任務</button>
+                            <button class="mission-button" onclick="startBranchMission(1)">開始任務</button>
                         </div>
+                        <div class="mission hidden" id="mission2">
+                            <h4>任務 2: 切換到分支</h4>
+                            <p>切換到剛建立的 'feature/login' 分支</p>
+                            <button class="mission-button" onclick="startBranchMission(2)">開始任務</button>
+                        </div>
+                        <div class="mission hidden" id="mission3">
+                            <h4>任務 3: 在分支上開發</h4>
+                            <p>在 feature/login 分支上新增登入功能</p>
+                            <button class="mission-button" onclick="startBranchMission(3)">開始任務</button>
+                        </div>
+                        <div class="mission hidden" id="mission4">
+                            <h4>任務 4: 合併分支</h4>
+                            <p>將 feature/login 分支合併回主分支</p>
+                            <button class="mission-button" onclick="startBranchMission(4)">開始任務</button>
+                        </div>
+                    </div>
+                    <div class="mission-progress" id="missionProgress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="missionProgressFill"></div>
+                        </div>
+                        <span class="progress-text" id="missionProgressText">0/4 任務完成</span>
                     </div>
                 </div>
             </div>
