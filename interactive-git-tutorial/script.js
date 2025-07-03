@@ -357,36 +357,105 @@ class GitLearningPlatform {
         const terminalInput = document.getElementById('terminalInput');
         if (!terminalInput) return;
 
+        // 初始化終端機狀態
+        this.commandHistory = [];
+        this.historyIndex = -1;
+        this.terminalState = {
+            currentStep: 0,
+            expectedCommands: ['git init', 'echo "Hello Git!" > hello.txt', 'git add hello.txt', 'git commit -m "First commit"']
+        };
+
+        // 命令輸入處理
         terminalInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const command = e.target.value.trim();
                 this.executeCommand(command);
                 e.target.value = '';
+                
+                // 滾動到底部
+                setTimeout(() => this.scrollTerminalToBottom(), 100);
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                this.handleTabCompletion(e.target);
             }
         });
 
-        // 添加命令歷史功能
-        this.commandHistory = [];
-        this.historyIndex = -1;
-
+        // 命令歷史導航
         terminalInput.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                if (this.historyIndex < this.commandHistory.length - 1) {
-                    this.historyIndex++;
-                    e.target.value = this.commandHistory[this.commandHistory.length - 1 - this.historyIndex];
-                }
+                this.navigateHistory('up', e.target);
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                if (this.historyIndex > 0) {
-                    this.historyIndex--;
-                    e.target.value = this.commandHistory[this.commandHistory.length - 1 - this.historyIndex];
-                } else {
-                    this.historyIndex = -1;
-                    e.target.value = '';
-                }
+                this.navigateHistory('down', e.target);
             }
         });
+
+        // 點擊聚焦
+        const terminal = document.getElementById('terminal');
+        if (terminal) {
+            terminal.addEventListener('click', () => {
+                terminalInput.focus();
+            });
+        }
+
+        // 初始化自動完成
+        this.initializeAutoComplete();
+    }
+
+    navigateHistory(direction, input) {
+        if (direction === 'up') {
+            if (this.historyIndex < this.commandHistory.length - 1) {
+                this.historyIndex++;
+                input.value = this.commandHistory[this.commandHistory.length - 1 - this.historyIndex];
+            }
+        } else if (direction === 'down') {
+            if (this.historyIndex > 0) {
+                this.historyIndex--;
+                input.value = this.commandHistory[this.commandHistory.length - 1 - this.historyIndex];
+            } else {
+                this.historyIndex = -1;
+                input.value = '';
+            }
+        }
+    }
+
+    handleTabCompletion(input) {
+        const currentValue = input.value;
+        const suggestions = this.getCommandSuggestions(currentValue);
+        
+        if (suggestions.length === 1) {
+            input.value = suggestions[0];
+        } else if (suggestions.length > 1) {
+            this.showSuggestions(suggestions);
+        }
+    }
+
+    getCommandSuggestions(partial) {
+        const commonCommands = [
+            'git init', 'git add', 'git commit', 'git status', 'git log',
+            'git branch', 'git checkout', 'git merge', 'git push', 'git pull',
+            'echo', 'ls', 'cat', 'mkdir', 'cd'
+        ];
+        
+        return commonCommands.filter(cmd => cmd.startsWith(partial));
+    }
+
+    showSuggestions(suggestions) {
+        const suggestionText = suggestions.join('  ');
+        this.addTerminalOutput(suggestionText, 'suggestion');
+    }
+
+    scrollTerminalToBottom() {
+        const output = document.getElementById('terminalOutput');
+        if (output) {
+            output.scrollTop = output.scrollHeight;
+        }
+    }
+
+    initializeAutoComplete() {
+        // 預載常用指令提示
+        this.addTerminalOutput('💡 提示：使用 Tab 鍵自動完成指令，↑↓ 鍵瀏覽歷史指令', 'hint');
     }
 
     executeCommand(command) {
@@ -733,8 +802,19 @@ class GitLearningPlatform {
         line.className = `output-line ${type}`;
         line.innerHTML = `<span class="output-text">${text.replace(/\n/g, '<br>')}</span>`;
         
+        // 添加打字機效果（僅限於提示和成功訊息）
+        if (type === 'hint' || type === 'success') {
+            line.style.opacity = '0';
+            line.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                line.style.transition = 'all 0.3s ease';
+                line.style.opacity = '1';
+                line.style.transform = 'translateY(0)';
+            }, 100);
+        }
+        
         output.appendChild(line);
-        output.scrollTop = output.scrollHeight;
+        this.scrollTerminalToBottom();
     }
 
     resetTerminal() {

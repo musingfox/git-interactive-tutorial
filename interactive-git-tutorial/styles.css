@@ -1143,3 +1143,100 @@ body {
         transform: translateY(0);
     }
 }
+
+/* 終端機使用體驗優化 */
+.terminal-container {
+    position: relative;
+}
+
+.terminal-input {
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #00ff00;
+    width: 100%;
+    font-size: 14px;
+    padding: 0;
+}
+
+.terminal-input::placeholder {
+    color: rgba(0, 255, 0, 0.5);
+}
+
+.output-line.hint {
+    color: #FFA500;
+    background: rgba(255, 165, 0, 0.1);
+    padding: 0.5rem;
+    border-radius: 5px;
+    border-left: 3px solid #FFA500;
+    margin: 0.5rem 0;
+}
+
+.output-line.success {
+    color: #00ff00;
+    background: rgba(0, 255, 0, 0.1);
+    padding: 0.5rem;
+    border-radius: 5px;
+    border-left: 3px solid #00ff00;
+    margin: 0.5rem 0;
+    font-weight: bold;
+}
+
+.output-line.error {
+    color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+    padding: 0.5rem;
+    border-radius: 5px;
+    border-left: 3px solid #ff4444;
+    margin: 0.5rem 0;
+}
+
+.output-line.suggestion {
+    color: #87CEEB;
+    background: rgba(135, 206, 235, 0.1);
+    padding: 0.3rem;
+    border-radius: 3px;
+    font-style: italic;
+    margin: 0.2rem 0;
+}
+
+.output-line.user-input {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* 終端機滾動條美化 */
+#terminalOutput {
+    scrollbar-width: thin;
+    scrollbar-color: #667eea transparent;
+}
+
+#terminalOutput::-webkit-scrollbar {
+    width: 6px;
+}
+
+#terminalOutput::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#terminalOutput::-webkit-scrollbar-thumb {
+    background-color: #667eea;
+    border-radius: 3px;
+}
+
+#terminalOutput::-webkit-scrollbar-thumb:hover {
+    background-color: #5a6fd8;
+}
+
+/* 終端機游標閃爍效果 */
+.terminal-input:focus::after {
+    content: '|';
+    animation: cursor-blink 1s infinite;
+    color: #00ff00;
+}
+
+@keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
