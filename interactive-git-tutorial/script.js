@@ -45,8 +45,8 @@ class GitLearningPlatform {
     }
 
     switchToLesson(lessonId) {
-        // 標記前一個課程為完成（除了歡迎頁面）
-        if (this.currentLesson && this.currentLesson !== 'welcome' && this.currentLesson !== lessonId) {
+        // 標記前一個課程為完成（除非是同一課程）
+        if (this.currentLesson && this.currentLesson !== lessonId) {
             this.completedLessons.add(this.currentLesson);
         }
 
@@ -74,6 +74,9 @@ class GitLearningPlatform {
             
             // 更新進度條
             this.updateProgress();
+            
+            // 添加導航按鈕
+            setTimeout(() => this.addNavigationButtons(), 100);
         }
     }
 
@@ -277,24 +280,50 @@ class GitLearningPlatform {
 
     // 移動檔案到指定區域
     moveFileToZone(fileName, zoneName) {
-        const fileElement = document.querySelector(`[draggable="true"]:contains("${fileName}")`);
+        // 尋找包含指定檔案名稱的可拖拉元素
+        const draggableElements = document.querySelectorAll('[draggable="true"]');
+        let fileElement = null;
+        
+        for (const element of draggableElements) {
+            if (element.textContent.trim() === fileName) {
+                fileElement = element;
+                break;
+            }
+        }
+        
         if (!fileElement) return;
         
         // 創建檔案副本在目標區域
         const targetZone = document.querySelector(`[data-zone="${zoneName}"]`);
         if (targetZone) {
-            const fileClone = fileElement.cloneNode(true);
-            fileClone.classList.add('file-in-zone');
+            // 移除之前的檔案副本
+            const existingFile = targetZone.querySelector('.file-in-zone');
+            if (existingFile) {
+                existingFile.remove();
+            }
+            
+            // 創建新的檔案副本
+            const fileClone = document.createElement('div');
+            fileClone.className = 'file-in-zone';
+            fileClone.textContent = fileName;
+            fileClone.innerHTML = `<i class="fas fa-file"></i> ${fileName}`;
+            
             targetZone.appendChild(fileClone);
             
-            // 動畫效果
-            fileClone.style.transform = 'scale(0)';
+            // 添加成功動畫
+            fileClone.style.transform = 'scale(0) translateY(-20px)';
             fileClone.style.opacity = '0';
             setTimeout(() => {
-                fileClone.style.transition = 'all 0.3s ease';
-                fileClone.style.transform = 'scale(1)';
+                fileClone.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                fileClone.style.transform = 'scale(1) translateY(0)';
                 fileClone.style.opacity = '1';
             }, 100);
+            
+            // 添加區域高亮效果
+            targetZone.classList.add('zone-highlight');
+            setTimeout(() => {
+                targetZone.classList.remove('zone-highlight');
+            }, 1000);
         }
     }
 
@@ -1278,6 +1307,41 @@ class GitLearningPlatform {
         
         if (currentIndex > 0) {
             this.switchToLesson(lessons[currentIndex - 1]);
+        }
+    }
+
+    // 添加導航按鈕到課程頁面
+    addNavigationButtons() {
+        const lessons = ['welcome', 'what-is-git', 'basic-concepts', 'first-commit', 'branches', 'merging'];
+        const currentIndex = lessons.indexOf(this.currentLesson);
+        
+        // 移除現有的導航按鈕
+        document.querySelectorAll('.lesson-navigation').forEach(nav => nav.remove());
+        
+        const activeLesson = document.querySelector('.lesson-content.active');
+        if (activeLesson) {
+            const navContainer = document.createElement('div');
+            navContainer.className = 'lesson-navigation';
+            
+            // 上一課按鈕
+            if (currentIndex > 0) {
+                const prevButton = document.createElement('button');
+                prevButton.className = 'nav-button prev-button';
+                prevButton.innerHTML = '← 上一課';
+                prevButton.onclick = () => this.previousLesson();
+                navContainer.appendChild(prevButton);
+            }
+            
+            // 下一課按鈕
+            if (currentIndex < lessons.length - 1) {
+                const nextButton = document.createElement('button');
+                nextButton.className = 'nav-button next-button';
+                nextButton.innerHTML = '下一課 →';
+                nextButton.onclick = () => this.nextLesson();
+                navContainer.appendChild(nextButton);
+            }
+            
+            activeLesson.appendChild(navContainer);
         }
     }
 

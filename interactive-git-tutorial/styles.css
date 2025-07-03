@@ -857,13 +857,36 @@ body {
 }
 
 .file-in-zone {
-    display: inline-block;
-    background: rgba(102, 126, 234, 0.1);
-    padding: 0.3rem 0.8rem;
-    margin: 0.2rem;
-    border-radius: 15px;
-    border: 1px solid #667eea;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(102, 126, 234, 0.2);
+    padding: 0.5rem 1rem;
+    margin: 0.5rem;
+    border-radius: 20px;
+    border: 2px solid #667eea;
     font-size: 0.9rem;
+    font-weight: bold;
+    color: #4a5568;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file-in-zone i {
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.zone-highlight {
+    background: rgba(76, 175, 80, 0.2) !important;
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important;
+    animation: zone-pulse 0.5s ease;
+}
+
+@keyframes zone-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
 }
 
 .drag-guidance {
@@ -1239,4 +1262,56 @@ body {
 @keyframes cursor-blink {
     0%, 50% { opacity: 1; }
     51%, 100% { opacity: 0; }
+}
+
+/* 課程導航按鈕 */
+.lesson-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 3rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.nav-button:active {
+    transform: translateY(0);
+}
+
+.prev-button {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+}
+
+.prev-button:hover {
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+}
+
+.next-button {
+    margin-left: auto;
+}
+
+/* 當只有一個按鈕時居中顯示 */
+.lesson-navigation:has(> .nav-button:only-child) {
+    justify-content: center;
 }
