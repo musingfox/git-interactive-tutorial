@@ -808,3 +808,133 @@ body {
     margin-left: auto;
     font-size: 1.2rem;
 }
+
+/* 拖拉練習增強視覺回饋 */
+.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.highlight-drop-zone {
+    border: 2px dashed #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    animation: pulse-glow 1s infinite;
+}
+
+.drag-over {
+    border: 2px solid #4CAF50;
+    background: rgba(76, 175, 80, 0.2);
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+}
+
+.drop-success {
+    background: rgba(76, 175, 80, 0.3);
+    border: 2px solid #4CAF50;
+    animation: success-bounce 0.6s ease;
+}
+
+.drop-error {
+    background: rgba(244, 67, 54, 0.3);
+    border: 2px solid #f44336;
+    animation: error-shake 0.6s ease;
+}
+
+.drop-success-mark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #4CAF50;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    animation: success-appear 0.5s ease;
+    z-index: 10;
+}
+
+.file-in-zone {
+    display: inline-block;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 0.3rem 0.8rem;
+    margin: 0.2rem;
+    border-radius: 15px;
+    border: 1px solid #667eea;
+    font-size: 0.9rem;
+}
+
+.drag-guidance {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(102, 126, 234, 0.9);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: bold;
+    z-index: 1001;
+    animation: guidance-slide 0.5s ease;
+}
+
+.zone-info {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    animation: info-fade-in 0.3s ease;
+}
+
+/* 動畫效果 */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
+    50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6); }
+}
+
+@keyframes success-bounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes error-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes success-appear {
+    0% { 
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    100% { 
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes guidance-slide {
+    0% { 
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes info-fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}

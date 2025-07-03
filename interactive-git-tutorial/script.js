@@ -177,23 +177,47 @@ class GitLearningPlatform {
     handleDragStart(e) {
         e.dataTransfer.setData('text/plain', e.target.textContent.trim());
         e.target.classList.add('dragging');
+        
+        // 高亮所有可放置區域
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.classList.add('highlight-drop-zone');
+        });
+        
+        // 添加拖拉指引
+        this.showDragGuidance();
     }
 
     handleDragEnd(e) {
         e.target.classList.remove('dragging');
+        
+        // 移除所有高亮效果
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.classList.remove('highlight-drop-zone', 'drag-over');
+        });
+        
+        // 移除拖拉指引
+        this.hideDragGuidance();
     }
 
     handleDragOver(e) {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
     }
 
     handleDragEnter(e) {
         e.preventDefault();
         e.currentTarget.classList.add('drag-over');
+        
+        // 顯示區域說明
+        this.showDropZoneInfo(e.currentTarget);
     }
 
     handleDragLeave(e) {
-        e.currentTarget.classList.remove('drag-over');
+        // 只在真正離開元素時移除樣式
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            e.currentTarget.classList.remove('drag-over');
+            this.hideDropZoneInfo();
+        }
     }
 
     handleDrop(e) {
@@ -203,25 +227,124 @@ class GitLearningPlatform {
         const fileName = e.dataTransfer.getData('text/plain');
         const targetZone = e.currentTarget.dataset.zone;
         
+        // 顯示成功動畫
+        this.showDropSuccessAnimation(e.currentTarget, fileName);
+        
         // 根據目標區域給予回饋
         if (targetZone === 'staging') {
             this.showMessage(`很好！${fileName} 已加入暫存區。這相當於執行 'git add ${fileName}'`, 'success');
+            this.moveFileToZone(fileName, 'staging');
         } else if (targetZone === 'repository') {
             if (this.hasFileInStaging(fileName)) {
                 this.showMessage(`完美！${fileName} 已提交到版本庫。這相當於執行 'git commit'`, 'success');
+                this.moveFileToZone(fileName, 'repository');
             } else {
                 this.showMessage(`等等！檔案需要先加入暫存區才能提交。`, 'error');
+                this.showErrorAnimation(e.currentTarget);
                 return;
             }
         } else if (targetZone === 'working') {
             this.showMessage(`${fileName} 在工作區中。你可以編輯這個檔案。`, 'info');
+            this.moveFileToZone(fileName, 'working');
+        }
+    }
+
+    // 顯示放置成功動畫
+    showDropSuccessAnimation(element, fileName) {
+        element.classList.add('drop-success');
+        
+        // 創建成功標記
+        const successMark = document.createElement('div');
+        successMark.className = 'drop-success-mark';
+        successMark.innerHTML = `✓ ${fileName}`;
+        element.appendChild(successMark);
+        
+        setTimeout(() => {
+            element.classList.remove('drop-success');
+            if (successMark.parentNode) {
+                successMark.remove();
+            }
+        }, 2000);
+    }
+
+    // 顯示錯誤動畫
+    showErrorAnimation(element) {
+        element.classList.add('drop-error');
+        setTimeout(() => {
+            element.classList.remove('drop-error');
+        }, 1000);
+    }
+
+    // 移動檔案到指定區域
+    moveFileToZone(fileName, zoneName) {
+        const fileElement = document.querySelector(`[draggable="true"]:contains("${fileName}")`);
+        if (!fileElement) return;
+        
+        // 創建檔案副本在目標區域
+        const targetZone = document.querySelector(`[data-zone="${zoneName}"]`);
+        if (targetZone) {
+            const fileClone = fileElement.cloneNode(true);
+            fileClone.classList.add('file-in-zone');
+            targetZone.appendChild(fileClone);
+            
+            // 動畫效果
+            fileClone.style.transform = 'scale(0)';
+            fileClone.style.opacity = '0';
+            setTimeout(() => {
+                fileClone.style.transition = 'all 0.3s ease';
+                fileClone.style.transform = 'scale(1)';
+                fileClone.style.opacity = '1';
+            }, 100);
+        }
+    }
+
+    // 顯示拖拉指引
+    showDragGuidance() {
+        const guidance = document.createElement('div');
+        guidance.id = 'drag-guidance';
+        guidance.className = 'drag-guidance';
+        guidance.innerHTML = '拖拉檔案到不同區域來學習 Git 工作流程';
+        document.body.appendChild(guidance);
+    }
+
+    // 隱藏拖拉指引
+    hideDragGuidance() {
+        const guidance = document.getElementById('drag-guidance');
+        if (guidance) {
+            guidance.remove();
+        }
+    }
+
+    // 顯示區域資訊
+    showDropZoneInfo(zone) {
+        const zoneName = zone.dataset.zone;
+        let info = '';
+        
+        switch(zoneName) {
+            case 'working':
+                info = '工作區：編輯檔案的地方';
+                break;
+            case 'staging':
+                info = '暫存區：準備提交的檔案';
+                break;
+            case 'repository':
+                info = '版本庫：已提交的檔案歷史';
+                break;
         }
         
-        // 視覺回饋
-        e.currentTarget.style.backgroundColor = '#e8f5e8';
-        setTimeout(() => {
-            e.currentTarget.style.backgroundColor = '';
-        }, 1000);
+        const infoElement = document.createElement('div');
+        infoElement.id = 'zone-info';
+        infoElement.className = 'zone-info';
+        infoElement.textContent = info;
+        zone.appendChild(infoElement);
+    }
+
+    // 隱藏區域資訊
+    hideDropZoneInfo() {
+        const info = document.getElementById('zone-info');
+        if (info) {
+            info.remove();
+        }
     }
 
     hasFileInStaging(fileName) {
