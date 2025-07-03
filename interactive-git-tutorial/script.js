@@ -45,6 +45,11 @@ class GitLearningPlatform {
     }
 
     switchToLesson(lessonId) {
+        // 標記前一個課程為完成（除了歡迎頁面）
+        if (this.currentLesson && this.currentLesson !== 'welcome' && this.currentLesson !== lessonId) {
+            this.completedLessons.add(this.currentLesson);
+        }
+
         // 隱藏所有課程內容
         document.querySelectorAll('.lesson-content').forEach(content => {
             content.classList.remove('active');
@@ -66,6 +71,9 @@ class GitLearningPlatform {
             
             // 初始化特定課程的功能
             this.initLessonFeatures(lessonId);
+            
+            // 更新進度條
+            this.updateProgress();
         }
     }
 
@@ -891,9 +899,9 @@ class GitLearningPlatform {
 
     // 進度更新
     updateProgress() {
-        const totalLessons = 6;
+        const totalLessons = 5; // welcome, what-is-git, basic-concepts, first-commit, branches
         const completed = this.completedLessons.size;
-        const progressPercent = (completed / totalLessons) * 100;
+        const progressPercent = Math.min((completed / totalLessons) * 100, 100);
         
         const progressFill = document.getElementById('progressFill');
         const progressText = document.getElementById('progressText');
@@ -901,7 +909,55 @@ class GitLearningPlatform {
         if (progressFill && progressText) {
             progressFill.style.width = `${progressPercent}%`;
             progressText.textContent = `${Math.round(progressPercent)}%`;
+            
+            // 動畫效果
+            progressFill.style.transition = 'width 0.5s ease-in-out';
         }
+        
+        // 更新側邊欄完成狀態
+        this.updateSidebarCompletionStatus();
+        
+        // 如果完成所有課程，顯示恭喜訊息
+        if (completed >= totalLessons) {
+            this.showCompletionCelebration();
+        }
+    }
+
+    // 更新側邊欄完成狀態
+    updateSidebarCompletionStatus() {
+        document.querySelectorAll('.lesson-item').forEach(item => {
+            const lesson = item.dataset.lesson;
+            if (this.completedLessons.has(lesson)) {
+                item.classList.add('completed');
+                // 添加完成標記
+                if (!item.querySelector('.completion-mark')) {
+                    const mark = document.createElement('span');
+                    mark.className = 'completion-mark';
+                    mark.innerHTML = '✓';
+                    item.appendChild(mark);
+                }
+            }
+        });
+    }
+
+    // 課程完成慶祝
+    showCompletionCelebration() {
+        const celebration = document.createElement('div');
+        celebration.className = 'completion-celebration';
+        celebration.innerHTML = `
+            <div class="celebration-content">
+                <h2>🎉 恭喜完成 Git 學習！</h2>
+                <p>你已經掌握了 Git 的基本技能！</p>
+                <button onclick="restartCourse()">重新學習</button>
+            </div>
+        `;
+        document.body.appendChild(celebration);
+        
+        setTimeout(() => {
+            if (celebration.parentNode) {
+                celebration.remove();
+            }
+        }, 5000);
     }
 }
 
