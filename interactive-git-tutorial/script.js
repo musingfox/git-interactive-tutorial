@@ -1604,8 +1604,53 @@ class GitLearningPlatform {
 
     // 合併模擬器初始化
     initMergeSimulator() {
-        // 這裡可以添加合併視覺化的邏輯
+        // 初始化合併模擬器狀態
+        this.mergeState = {
+            currentScenario: null,
+            hasConflict: false
+        };
+        
+        // 設定初始顯示
+        this.resetMergeVisualization();
         this.showMessage('合併模擬器已準備就緒！', 'info');
+    }
+    
+    resetMergeVisualization() {
+        const visualization = document.getElementById('mergeVisualization');
+        if (visualization) {
+            visualization.innerHTML = `
+                <div class="scenario-display">
+                    <h4>選擇上方按鈕開始模擬合併情境</h4>
+                    <p>每種合併類型都有不同的處理方式和結果</p>
+                    <div class="initial-git-graph">
+                        <svg width="400" height="200" viewBox="0 0 400 200">
+                            <!-- Main branch -->
+                            <line x1="50" y1="100" x2="200" y2="100" stroke="#667eea" stroke-width="3"/>
+                            <!-- Feature branch -->
+                            <line x1="150" y1="100" x2="200" y2="60" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5"/>
+                            <line x1="200" y1="60" x2="350" y2="60" stroke="#FF6B6B" stroke-width="3"/>
+                            
+                            <!-- Commits -->
+                            <circle cx="100" cy="100" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                            <text x="100" y="105" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                            
+                            <circle cx="150" cy="100" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                            <text x="150" y="105" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                            
+                            <circle cx="250" cy="60" r="12" fill="#FF6B6B" stroke="#fff" stroke-width="2"/>
+                            <text x="250" y="65" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                            
+                            <circle cx="300" cy="60" r="12" fill="#FF6B6B" stroke="#fff" stroke-width="2"/>
+                            <text x="300" y="65" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                            
+                            <!-- Branch labels -->
+                            <text x="100" y="130" text-anchor="middle" fill="#667eea" font-size="12" font-weight="bold">main</text>
+                            <text x="275" y="45" text-anchor="middle" fill="#FF6B6B" font-size="12" font-weight="bold">feature</text>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     // 分支練習遊戲系統
@@ -2052,37 +2097,90 @@ function simulateFastForward() {
         <div class="merge-scenario">
             <h4>📋 Fast-Forward 合併</h4>
             <div class="scenario-explanation">
-                <p>當目標分支是線性發展時，Git 只需要移動指針即可。</p>
+                <p>當 feature 分支是從 main 分支線性發展時，Git 只需要移動 main 指針到 feature 的最新提交。</p>
             </div>
-            <div class="merge-diagram">
-                <div class="commit-line">
-                    <div class="commit">A</div>
-                    <div class="commit">B</div>
-                    <div class="commit current">C</div>
-                    <div class="branch-pointer main">main</div>
+            
+            <div class="merge-steps">
+                <div class="step" id="ff-step-1">
+                    <h5>步驟 1: 合併前狀態</h5>
+                    <svg width="450" height="150" viewBox="0 0 450 150">
+                        <!-- Main branch line -->
+                        <line x1="50" y1="80" x2="200" y2="80" stroke="#667eea" stroke-width="3"/>
+                        <!-- Feature branch line -->
+                        <line x1="200" y1="80" x2="350" y2="80" stroke="#FF6B6B" stroke-width="3"/>
+                        
+                        <!-- Commits -->
+                        <circle cx="100" cy="80" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="100" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                        
+                        <circle cx="150" cy="80" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="150" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                        
+                        <circle cx="250" cy="80" r="12" fill="#FF6B6B" stroke="#fff" stroke-width="2"/>
+                        <text x="250" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                        
+                        <circle cx="300" cy="80" r="12" fill="#FF6B6B" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                        
+                        <!-- Branch pointers -->
+                        <rect x="130" y="50" width="40" height="20" fill="#667eea" rx="10"/>
+                        <text x="150" y="63" text-anchor="middle" fill="white" font-size="10" font-weight="bold">main</text>
+                        
+                        <rect x="280" y="50" width="40" height="20" fill="#FF6B6B" rx="10"/>
+                        <text x="300" y="63" text-anchor="middle" fill="white" font-size="10" font-weight="bold">feature</text>
+                    </svg>
                 </div>
-                <div class="merge-arrow">↓ Fast-Forward</div>
-                <div class="commit-line">
-                    <div class="commit">A</div>
-                    <div class="commit">B</div>
-                    <div class="commit current">C</div>
-                    <div class="branch-pointer main moved">main</div>
+                
+                <div class="step" id="ff-step-2" style="display: none;">
+                    <h5>步驟 2: 合併後狀態 (Fast-Forward)</h5>
+                    <svg width="450" height="150" viewBox="0 0 450 150">
+                        <!-- Single branch line -->
+                        <line x1="50" y1="80" x2="350" y2="80" stroke="#667eea" stroke-width="3"/>
+                        
+                        <!-- Commits -->
+                        <circle cx="100" cy="80" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="100" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                        
+                        <circle cx="150" cy="80" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="150" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                        
+                        <circle cx="250" cy="80" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="250" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                        
+                        <circle cx="300" cy="80" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                        
+                        <!-- Main pointer moved to D -->
+                        <rect x="280" y="50" width="40" height="20" fill="#4CAF50" rx="10"/>
+                        <text x="300" y="63" text-anchor="middle" fill="white" font-size="10" font-weight="bold">main</text>
+                        
+                        <!-- Arrow showing movement -->
+                        <path d="M 170 40 Q 225 25 280 40" stroke="#4CAF50" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                        <text x="225" y="20" text-anchor="middle" fill="#4CAF50" font-size="12" font-weight="bold">Fast-Forward</text>
+                        
+                        <!-- Arrow marker definition -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#4CAF50"/>
+                            </marker>
+                        </defs>
+                    </svg>
                 </div>
             </div>
+            
             <div class="scenario-commands">
-                <code>git checkout main</code><br>
-                <code>git merge feature-branch</code>
+                <h5>命令序列：</h5>
+                <pre><code>git checkout main
+git merge feature-branch
+# 結果: Fast-forward merge 成功！</code></pre>
             </div>
+            
+            <button class="demo-button" onclick="showNextFFStep()">
+                <i class="fas fa-play"></i>
+                查看合併結果
+            </button>
         </div>
     `;
-    
-    // 添加動畫效果
-    setTimeout(() => {
-        const movedPointer = visualization.querySelector('.moved');
-        if (movedPointer) {
-            movedPointer.style.transform = 'translateX(0)';
-        }
-    }, 100);
 }
 
 function simulateThreeWayMerge() {
@@ -2092,96 +2190,386 @@ function simulateThreeWayMerge() {
         <div class="merge-scenario">
             <h4>🔀 Three-way 合併</h4>
             <div class="scenario-explanation">
-                <p>當兩個分支都有新提交時，Git 會創建一個新的合併提交。</p>
+                <p>當 main 和 feature 分支都有不同的新提交時，Git 會創建一個新的合併提交來整合兩者。</p>
             </div>
-            <div class="merge-diagram three-way">
-                <div class="branch-line main-line">
-                    <div class="commit">A</div>
-                    <div class="commit">B</div>
-                    <div class="commit">C</div>
-                    <div class="commit merge">M</div>
-                    <div class="branch-pointer main">main</div>
+            
+            <div class="merge-steps">
+                <div class="step" id="tw-step-1">
+                    <h5>步驟 1: 合併前狀態 (兩個分支都有新提交)</h5>
+                    <svg width="500" height="200" viewBox="0 0 500 200">
+                        <!-- Main branch -->
+                        <line x1="50" y1="120" x2="200" y2="120" stroke="#667eea" stroke-width="3"/>
+                        <line x1="200" y1="120" x2="350" y2="120" stroke="#667eea" stroke-width="3"/>
+                        
+                        <!-- Feature branch -->
+                        <line x1="200" y1="120" x2="250" y2="80" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5"/>
+                        <line x1="250" y1="80" x2="350" y2="80" stroke="#FF6B6B" stroke-width="3"/>
+                        
+                        <!-- Common ancestor and main commits -->
+                        <circle cx="100" cy="120" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="100" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                        
+                        <circle cx="200" cy="120" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="200" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                        
+                        <circle cx="300" cy="120" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                        
+                        <!-- Feature branch commits -->
+                        <circle cx="300" cy="80" r="12" fill="#FF6B6B" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                        
+                        <!-- Branch pointers -->
+                        <rect x="280" y="140" width="40" height="20" fill="#667eea" rx="10"/>
+                        <text x="300" y="153" text-anchor="middle" fill="white" font-size="10" font-weight="bold">main</text>
+                        
+                        <rect x="280" y="50" width="50" height="20" fill="#FF6B6B" rx="10"/>
+                        <text x="305" y="63" text-anchor="middle" fill="white" font-size="10" font-weight="bold">feature</text>
+                        
+                        <!-- Labels -->
+                        <text x="200" y="40" text-anchor="middle" fill="#666" font-size="12">Common Ancestor (B)</text>
+                        <path d="M 200 45 L 200 105" stroke="#666" stroke-width="1" stroke-dasharray="3,3"/>
+                    </svg>
                 </div>
-                <div class="branch-line feature-line">
-                    <div class="commit">D</div>
-                    <div class="commit">E</div>
-                    <div class="branch-pointer feature">feature</div>
+                
+                <div class="step" id="tw-step-2" style="display: none;">
+                    <h5>步驟 2: 合併後狀態 (創建合併提交)</h5>
+                    <svg width="500" height="200" viewBox="0 0 500 200">
+                        <!-- Main branch -->
+                        <line x1="50" y1="120" x2="200" y2="120" stroke="#667eea" stroke-width="3"/>
+                        <line x1="200" y1="120" x2="350" y2="120" stroke="#667eea" stroke-width="3"/>
+                        <line x1="350" y1="120" x2="400" y2="120" stroke="#667eea" stroke-width="3"/>
+                        
+                        <!-- Feature branch -->
+                        <line x1="200" y1="120" x2="250" y2="80" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5"/>
+                        <line x1="250" y1="80" x2="350" y2="80" stroke="#FF6B6B" stroke-width="3"/>
+                        
+                        <!-- Merge lines -->
+                        <line x1="350" y1="120" x2="400" y2="120" stroke="#4CAF50" stroke-width="3"/>
+                        <line x1="350" y1="80" x2="400" y2="120" stroke="#4CAF50" stroke-width="3" stroke-dasharray="3,3"/>
+                        
+                        <!-- Commits -->
+                        <circle cx="100" cy="120" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="100" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                        
+                        <circle cx="200" cy="120" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="200" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                        
+                        <circle cx="300" cy="120" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                        
+                        <circle cx="350" cy="80" r="12" fill="#FF6B6B" stroke="#fff" stroke-width="2"/>
+                        <text x="350" y="85" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                        
+                        <!-- Merge commit -->
+                        <circle cx="400" cy="120" r="12" fill="#4CAF50" stroke="#fff" stroke-width="2"/>
+                        <text x="400" y="125" text-anchor="middle" fill="white" font-size="10" font-weight="bold">M</text>
+                        
+                        <!-- Main pointer moved to merge commit -->
+                        <rect x="380" y="140" width="40" height="20" fill="#4CAF50" rx="10"/>
+                        <text x="400" y="153" text-anchor="middle" fill="white" font-size="10" font-weight="bold">main</text>
+                        
+                        <!-- Labels -->
+                        <text x="400" y="100" text-anchor="middle" fill="#4CAF50" font-size="12" font-weight="bold">Merge Commit</text>
+                    </svg>
                 </div>
             </div>
+            
             <div class="scenario-commands">
-                <code>git checkout main</code><br>
-                <code>git merge feature-branch</code><br>
-                <code># 自動創建合併提交</code>
+                <h5>命令序列：</h5>
+                <pre><code>git checkout main
+git merge feature-branch
+# Git 會自動創建合併提交 M</code></pre>
             </div>
+            
+            <button class="demo-button" onclick="showNextTWStep()">
+                <i class="fas fa-play"></i>
+                查看合併結果
+            </button>
         </div>
     `;
 }
 
 function simulateConflict() {
     const visualization = document.getElementById('mergeVisualization');
-    const conflictSection = document.getElementById('conflictSection');
     
     visualization.innerHTML = `
         <div class="merge-scenario conflict">
-            <h4>⚠️ 合併衝突</h4>
+            <h4>⚠️ 合併衝突情境</h4>
             <div class="scenario-explanation">
-                <p>當兩個分支修改同一檔案的同一部分時，會發生衝突。</p>
+                <p>當兩個分支都修改了同一檔案的相同區域時，Git 無法自動決定如何合併，需要手動解決衝突。</p>
             </div>
-            <div class="conflict-indicator">
-                <div class="conflict-file">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>index.html 有衝突</span>
+            
+            <div class="merge-steps">
+                <div class="step" id="conflict-step-1">
+                    <h5>步驟 1: 衝突前狀態 (兩分支修改同一檔案)</h5>
+                    <svg width="500" height="250" viewBox="0 0 500 250">
+                        <!-- Main branch -->
+                        <line x1="50" y1="150" x2="200" y2="150" stroke="#667eea" stroke-width="3"/>
+                        <line x1="200" y1="150" x2="350" y2="150" stroke="#667eea" stroke-width="3"/>
+                        
+                        <!-- Feature branch -->
+                        <line x1="200" y1="150" x2="250" y2="100" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5"/>
+                        <line x1="250" y1="100" x2="350" y2="100" stroke="#FF6B6B" stroke-width="3"/>
+                        
+                        <!-- Base commits -->
+                        <circle cx="100" cy="150" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="100" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                        
+                        <circle cx="200" cy="150" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="200" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                        
+                        <!-- Conflicting commits -->
+                        <circle cx="300" cy="150" r="12" fill="#dc3545" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                        
+                        <circle cx="300" cy="100" r="12" fill="#dc3545" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="105" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                        
+                        <!-- Branch pointers -->
+                        <rect x="280" y="170" width="40" height="20" fill="#667eea" rx="10"/>
+                        <text x="300" y="183" text-anchor="middle" fill="white" font-size="10" font-weight="bold">main</text>
+                        
+                        <rect x="280" y="70" width="50" height="20" fill="#FF6B6B" rx="10"/>
+                        <text x="305" y="83" text-anchor="middle" fill="white" font-size="10" font-weight="bold">feature</text>
+                        
+                        <!-- Conflict indicators -->
+                        <g>
+                            <rect x="380" y="90" width="100" height="70" fill="#fff3cd" stroke="#856404" stroke-width="2" rx="5"/>
+                            <text x="430" y="110" text-anchor="middle" fill="#856404" font-size="12" font-weight="bold">⚠️ 衝突區域</text>
+                            <text x="430" y="125" text-anchor="middle" fill="#856404" font-size="10">C: title: 應用程式</text>
+                            <text x="430" y="140" text-anchor="middle" fill="#856404" font-size="10">D: title: 網站</text>
+                        </g>
+                        
+                        <!-- Conflict arrows -->
+                        <path d="M 320 140 Q 350 125 380 125" stroke="#dc3545" stroke-width="2" fill="none" marker-end="url(#conflictArrow)"/>
+                        <path d="M 320 110 Q 350 115 380 115" stroke="#dc3545" stroke-width="2" fill="none" marker-end="url(#conflictArrow)"/>
+                        
+                        <defs>
+                            <marker id="conflictArrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                <polygon points="0 0, 8 3, 0 6" fill="#dc3545"/>
+                            </marker>
+                        </defs>
+                    </svg>
                 </div>
-                <div class="conflict-status">
-                    需要手動解決衝突
+                
+                <div class="step" id="conflict-step-2" style="display: none;">
+                    <h5>步驟 2: 合併失敗 - 需要手動解決</h5>
+                    <svg width="500" height="280" viewBox="0 0 500 280">
+                        <!-- Same branch structure -->
+                        <line x1="50" y1="150" x2="200" y2="150" stroke="#667eea" stroke-width="3"/>
+                        <line x1="200" y1="150" x2="350" y2="150" stroke="#667eea" stroke-width="3"/>
+                        <line x1="200" y1="150" x2="250" y2="100" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5"/>
+                        <line x1="250" y1="100" x2="350" y2="100" stroke="#FF6B6B" stroke-width="3"/>
+                        
+                        <!-- Base commits -->
+                        <circle cx="100" cy="150" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="100" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                        
+                        <circle cx="200" cy="150" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="200" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                        
+                        <!-- Conflicting commits -->
+                        <circle cx="300" cy="150" r="12" fill="#dc3545" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                        
+                        <circle cx="300" cy="100" r="12" fill="#dc3545" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="105" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                        
+                        <!-- Failed merge commit (dashed) -->
+                        <circle cx="400" cy="125" r="12" fill="none" stroke="#dc3545" stroke-width="3" stroke-dasharray="4,4"/>
+                        <text x="400" y="130" text-anchor="middle" fill="#dc3545" font-size="10" font-weight="bold">?</text>
+                        
+                        <!-- Branch pointers -->
+                        <rect x="280" y="170" width="40" height="20" fill="#667eea" rx="10"/>
+                        <text x="300" y="183" text-anchor="middle" fill="white" font-size="10" font-weight="bold">main</text>
+                        
+                        <rect x="280" y="70" width="50" height="20" fill="#FF6B6B" rx="10"/>
+                        <text x="305" y="83" text-anchor="middle" fill="white" font-size="10" font-weight="bold">feature</text>
+                        
+                        <!-- Conflict resolution area -->
+                        <g>
+                            <rect x="50" y="200" width="400" height="60" fill="#f8d7da" stroke="#721c24" stroke-width="2" rx="5"/>
+                            <text x="250" y="220" text-anchor="middle" fill="#721c24" font-size="14" font-weight="bold">Git 衝突訊息</text>
+                            <text x="250" y="240" text-anchor="middle" fill="#721c24" font-size="12">CONFLICT (content): Merge conflict in index.html</text>
+                            <text x="250" y="255" text-anchor="middle" fill="#721c24" font-size="12">Automatic merge failed; fix conflicts and commit the result.</text>
+                        </g>
+                    </svg>
+                </div>
+                
+                <div class="step" id="conflict-step-3" style="display: none;">
+                    <h5>步驟 3: 解決衝突後的狀態</h5>
+                    <svg width="500" height="200" viewBox="0 0 500 200">
+                        <!-- Final branch structure -->
+                        <line x1="50" y1="150" x2="200" y2="150" stroke="#667eea" stroke-width="3"/>
+                        <line x1="200" y1="150" x2="350" y2="150" stroke="#667eea" stroke-width="3"/>
+                        <line x1="350" y1="150" x2="400" y2="150" stroke="#667eea" stroke-width="3"/>
+                        
+                        <line x1="200" y1="150" x2="250" y2="100" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5"/>
+                        <line x1="250" y1="100" x2="350" y2="100" stroke="#FF6B6B" stroke-width="3"/>
+                        <line x1="350" y1="100" x2="400" y2="150" stroke="#4CAF50" stroke-width="3" stroke-dasharray="3,3"/>
+                        
+                        <!-- Base commits -->
+                        <circle cx="100" cy="150" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="100" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">A</text>
+                        
+                        <circle cx="200" cy="150" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="200" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">B</text>
+                        
+                        <!-- Original conflicting commits -->
+                        <circle cx="300" cy="150" r="12" fill="#667eea" stroke="#fff" stroke-width="2"/>
+                        <text x="300" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">C</text>
+                        
+                        <circle cx="350" cy="100" r="12" fill="#FF6B6B" stroke="#fff" stroke-width="2"/>
+                        <text x="350" y="105" text-anchor="middle" fill="white" font-size="10" font-weight="bold">D</text>
+                        
+                        <!-- Resolved merge commit -->
+                        <circle cx="400" cy="150" r="12" fill="#4CAF50" stroke="#fff" stroke-width="2"/>
+                        <text x="400" y="155" text-anchor="middle" fill="white" font-size="10" font-weight="bold">M</text>
+                        
+                        <!-- Final main pointer -->
+                        <rect x="380" y="170" width="40" height="20" fill="#4CAF50" rx="10"/>
+                        <text x="400" y="183" text-anchor="middle" fill="white" font-size="10" font-weight="bold">main</text>
+                        
+                        <!-- Resolution indicator -->
+                        <text x="400" y="130" text-anchor="middle" fill="#4CAF50" font-size="12" font-weight="bold">已解決</text>
+                    </svg>
                 </div>
             </div>
+            
             <div class="scenario-commands">
-                <code>git checkout main</code><br>
-                <code>git merge feature-branch</code><br>
-                <code style="color: #dc3545;"># CONFLICT: 需要手動解決</code>
+                <h5>命令序列：</h5>
+                <pre><code>git checkout main
+git merge feature-branch
+# CONFLICT (content): Merge conflict in index.html
+# 手動編輯解決衝突...
+git add index.html
+git commit -m "Resolve merge conflict"</code></pre>
             </div>
+            
+            <button class="demo-button" onclick="showNextConflictStep()">
+                <i class="fas fa-play"></i>
+                查看衝突解決過程
+            </button>
         </div>
     `;
-    
-    // 顯示衝突解決部分
-    conflictSection.style.display = 'block';
-    conflictSection.scrollIntoView({ behavior: 'smooth' });
 }
 
 function resolveConflictDemo() {
-    const editor = document.getElementById('conflictEditor');
+    const visualization = document.getElementById('mergeVisualization');
     
-    // 模擬解決過程
-    editor.innerHTML = `
-        <pre><code>正在解決衝突...
-
-原始版本：
-<<<<<<< HEAD (main 分支)
-歡迎使用我們的應用程式！
-=======
-歡迎使用我們的網站！
->>>>>>> feature-branch (功能分支)
-</code></pre>
+    visualization.innerHTML = `
+        <div class="merge-scenario conflict-resolution">
+            <h4>🛠️ 實際衝突解決演示</h4>
+            <div class="conflict-file-demo">
+                <h5>index.html 檔案中的衝突內容：</h5>
+                <div class="code-editor">
+                    <pre class="conflict-code"><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Git 學習平台&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;
+<span class="conflict-marker">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+<span class="conflict-ours">        歡迎使用我們的應用程式！</span>
+<span class="conflict-marker">=======</span>
+<span class="conflict-theirs">        歡迎使用我們的網站！</span>
+<span class="conflict-marker">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-branch</span>
+    &lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                </div>
+                
+                <div class="resolution-steps">
+                    <h5>解決步驟：</h5>
+                    <div class="step-item">
+                        <span class="step-number">1</span>
+                        <span>找到衝突標記 (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>)</span>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">2</span>
+                        <span>決定保留哪個版本或合併兩者</span>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">3</span>
+                        <span>移除所有衝突標記</span>
+                    </div>
+                    <div class="step-item">
+                        <span class="step-number">4</span>
+                        <span>測試並提交解決方案</span>
+                    </div>
+                </div>
+                
+                <div class="resolution-demo">
+                    <h5>解決後的檔案：</h5>
+                    <div class="code-editor resolved">
+                        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Git 學習平台&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;
+        歡迎使用我們的應用程式和網站！
+    &lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <div class="final-commands">
+                    <h5>完成合併：</h5>
+                    <pre><code>git add index.html
+git commit -m "Resolve merge conflict: combine app and website welcome messages"</code></pre>
+                </div>
+            </div>
+        </div>
     `;
+}
+
+// 添加輔助函數來控制步驟顯示
+function showNextFFStep() {
+    const step1 = document.getElementById('ff-step-1');
+    const step2 = document.getElementById('ff-step-2');
     
-    setTimeout(() => {
-        editor.innerHTML = `
-            <pre><code>解決後：
+    if (step2.style.display === 'none') {
+        step2.style.display = 'block';
+        step2.scrollIntoView({ behavior: 'smooth' });
+    }
+}
 
-歡迎使用我們的應用程式和網站！
+function showNextTWStep() {
+    const step1 = document.getElementById('tw-step-1');
+    const step2 = document.getElementById('tw-step-2');
+    
+    if (step2.style.display === 'none') {
+        step2.style.display = 'block';
+        step2.scrollIntoView({ behavior: 'smooth' });
+    }
+}
 
-# 衝突已解決，可以進行提交
-# git add index.html
-# git commit -m "Resolve merge conflict"</code></pre>
-        `;
+function showNextConflictStep() {
+    const step1 = document.getElementById('conflict-step-1');
+    const step2 = document.getElementById('conflict-step-2');
+    const step3 = document.getElementById('conflict-step-3');
+    
+    if (step2.style.display === 'none') {
+        step2.style.display = 'block';
+        step2.scrollIntoView({ behavior: 'smooth' });
         
-        // 顯示成功訊息
-        const platform = window.gitPlatform;
-        if (platform) {
-            platform.showMessage('✅ 衝突已成功解決！這是團隊協作中非常重要的技能。', 'success');
+        // 改變按鈕文字
+        const button = document.querySelector('.demo-button');
+        if (button) {
+            button.innerHTML = '<i class="fas fa-play"></i> 查看最終結果';
+            button.onclick = () => {
+                step3.style.display = 'block';
+                step3.scrollIntoView({ behavior: 'smooth' });
+                button.innerHTML = '<i class="fas fa-tools"></i> 體驗衝突解決';
+                button.onclick = resolveConflictDemo;
+            };
         }
-    }, 2000);
+    }
 }
 
 function showCertificate() {
