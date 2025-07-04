@@ -34,14 +34,6 @@ class GitLearningPlatform {
             });
         });
 
-        // 鍵盤快捷鍵
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' && e.ctrlKey) {
-                this.nextLesson();
-            } else if (e.key === 'ArrowLeft' && e.ctrlKey) {
-                this.previousLesson();
-            }
-        });
     }
 
     switchToLesson(lessonId) {
@@ -75,8 +67,6 @@ class GitLearningPlatform {
             // 更新進度條
             this.updateProgress();
             
-            // 添加導航按鈕
-            setTimeout(() => this.addNavigationButtons(), 100);
         }
     }
 
@@ -86,11 +76,16 @@ class GitLearningPlatform {
                 this.initFileEvolutionDemo();
                 break;
             case 'basic-concepts':
-                this.initDragAndDrop();
+                this.initGitWorkflow();
                 break;
             case 'first-commit':
                 this.resetTerminal();
                 this.startCommitTutorial();
+                // 隱藏完成按鈕（重新開始時）
+                const nextButton = document.getElementById('firstCommitNextButton');
+                if (nextButton) {
+                    nextButton.style.display = 'none';
+                }
                 break;
             case 'branches':
                 this.initBranchVisualization();
@@ -127,259 +122,398 @@ class GitLearningPlatform {
         };
 
         const updateDisplay = () => {
-            container.innerHTML = createFileDisplay(stages[currentStage]);
+            // 更新上方遊戲存檔的 current class
+            this.updateGameSavePoints(currentStage);
             
-            const fileVersion = container.querySelector('.file-version');
-            fileVersion.style.opacity = '0';
-            fileVersion.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                fileVersion.style.transition = 'all 0.5s ease';
-                fileVersion.style.opacity = '1';
-                fileVersion.style.transform = 'translateY(0)';
-            }, 100);
+            // 先淡出現有內容
+            const existingContent = container.querySelector('.file-version');
+            if (existingContent) {
+                existingContent.style.transition = 'all 0.3s ease';
+                existingContent.style.opacity = '0';
+                existingContent.style.transform = 'translateY(-10px) scale(0.95)';
+                
+                setTimeout(() => {
+                    container.innerHTML = createFileDisplay(stages[currentStage]);
+                    const fileVersion = container.querySelector('.file-version');
+                    
+                    // 添加版本進度指示器
+                    const progressIndicator = document.createElement('div');
+                    progressIndicator.className = 'version-progress';
+                    progressIndicator.textContent = `第 ${currentStage + 1} 版本，共 ${stages.length} 版本`;
+                    fileVersion.appendChild(progressIndicator);
+                    
+                    // 淡入新內容
+                    fileVersion.style.opacity = '0';
+                    fileVersion.style.transform = 'translateY(20px) scale(0.95)';
+                    
+                    setTimeout(() => {
+                        fileVersion.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                        fileVersion.style.opacity = '1';
+                        fileVersion.style.transform = 'translateY(0) scale(1)';
+                    }, 50);
+                }, 300);
+            } else {
+                // 首次顯示
+                container.innerHTML = createFileDisplay(stages[currentStage]);
+                const fileVersion = container.querySelector('.file-version');
+                
+                const progressIndicator = document.createElement('div');
+                progressIndicator.className = 'version-progress';
+                progressIndicator.textContent = `第 ${currentStage + 1} 版本，共 ${stages.length} 版本`;
+                fileVersion.appendChild(progressIndicator);
+                
+                fileVersion.style.opacity = '0';
+                fileVersion.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    fileVersion.style.transition = 'all 0.5s ease';
+                    fileVersion.style.opacity = '1';
+                    fileVersion.style.transform = 'translateY(0)';
+                }, 100);
+            }
         };
 
+        // 新的互動式版本切換功能
         window.startFileEvolution = () => {
-            currentStage = 0;
-            updateDisplay();
+            // 隱藏按鈕，顯示互動提示
+            const button = document.querySelector('.demo-button');
+            button.style.display = 'none';
             
-            const interval = setInterval(() => {
-                currentStage++;
-                if (currentStage < stages.length) {
+            // 添加互動提示
+            const interactionHint = document.createElement('div');
+            interactionHint.className = 'interaction-hint';
+            interactionHint.innerHTML = `
+                <p>🎯 <strong>試試點擊上方的存檔點！</strong></p>
+                <p>體驗 Git 可以隨時切換版本的威力</p>
+            `;
+            button.parentNode.appendChild(interactionHint);
+            
+            // 讓存檔點可以點擊
+            this.enableSavePointInteraction();
+            
+            // 顯示提示訊息
+            this.showMessage('點擊上方的存檔點來切換版本！這就是 Git 的核心功能。', 'info');
+        };
+        
+        // 啟用存檔點互動功能
+        this.enableSavePointInteraction = () => {
+            const savePoints = document.querySelectorAll('.save-point');
+            savePoints.forEach((point, index) => {
+                point.style.cursor = 'pointer';
+                point.classList.add('interactive');
+                
+                // 添加點擊事件
+                point.addEventListener('click', () => {
+                    currentStage = index;
                     updateDisplay();
-                } else {
-                    clearInterval(interval);
-                    this.showMessage('檔案演變完成！這就是版本控制的威力。', 'success');
-                }
-            }, 2000);
+                    
+                    // 顯示切換訊息
+                    const versionName = stages[index].version;
+                    this.showMessage(`已切換到 ${versionName}！這就是 Git 讓你穿梭時空的能力。`, 'success');
+                });
+                
+                // 添加懸停效果
+                point.addEventListener('mouseenter', () => {
+                    if (!point.classList.contains('current')) {
+                        point.style.transform = 'scale(1.05)';
+                        point.style.opacity = '0.8';
+                    }
+                });
+                
+                point.addEventListener('mouseleave', () => {
+                    if (!point.classList.contains('current')) {
+                        point.style.transform = 'scale(1)';
+                        point.style.opacity = '1';
+                    }
+                });
+            });
         };
 
         // 初始顯示
         updateDisplay();
     }
-
-    // 拖拉功能設定
-    setupDragAndDrop() {
-        const draggables = document.querySelectorAll('.draggable');
-        const dropZones = document.querySelectorAll('.drop-zone');
-
-        draggables.forEach(draggable => {
-            draggable.addEventListener('dragstart', this.handleDragStart);
-            draggable.addEventListener('dragend', this.handleDragEnd);
+    
+    // Git 工作流程體驗初始化
+    initGitWorkflow() {
+        this.workflowState = {
+            fileInWorkingDir: false,
+            fileInStaging: false,
+            fileInRepository: false,
+            currentFile: null
+        };
+        
+        // 設置拖拉功能
+        this.setupWorkflowDragAndDrop();
+    }
+    
+    // 設置工作流程的拖拉功能
+    setupWorkflowDragAndDrop() {
+        // 稍後會在建立檔案時設置
+    }
+    
+    // 建立新檔案
+    createNewFile() {
+        const workingContent = document.getElementById('workingContent');
+        const gitWorkflow = document.getElementById('gitWorkflow');
+        const step1 = document.getElementById('step1');
+        
+        // 隱藏步驟1，顯示工作流程
+        step1.style.display = 'none';
+        gitWorkflow.style.display = 'block';
+        
+        // 創建檔案元素
+        const fileElement = document.createElement('div');
+        fileElement.className = 'workflow-file';
+        fileElement.draggable = true;
+        fileElement.id = 'workflowFile';
+        fileElement.innerHTML = `
+            <i class="fas fa-file-code"></i>
+            <span>index.html</span>
+            <div class="file-status">未追蹤</div>
+        `;
+        
+        // 添加檔案到工作區
+        workingContent.appendChild(fileElement);
+        
+        // 更新狀態
+        this.workflowState.fileInWorkingDir = true;
+        this.workflowState.currentFile = fileElement;
+        
+        // 啟用 git add 按鈕
+        document.getElementById('addBtn').disabled = false;
+        
+        // 設置拖拉事件
+        this.setupFileDragEvents(fileElement);
+        this.setupZoneDropEvents();
+        
+        // 顯示成功訊息
+        this.showMessage('✅ 檔案已建立！現在它在工作區中等待被追蹤。', 'success');
+        
+        // 更新提示
+        document.getElementById('workflowHint').innerHTML = '<p>🎯 拖拉檔案到暫存區，或點擊 "git add" 按鈕</p>';
+    }
+    
+    // 設置檔案拖拉事件
+    setupFileDragEvents(fileElement) {
+        fileElement.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', 'workflow-file');
+            fileElement.classList.add('dragging');
+            
+            // 高亮可放置的區域
+            document.querySelectorAll('.workflow-zone').forEach(zone => {
+                if (this.canDropInZone(zone.id)) {
+                    zone.classList.add('can-drop');
+                }
+            });
         });
-
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', this.handleDragOver);
-            zone.addEventListener('drop', this.handleDrop.bind(this));
-            zone.addEventListener('dragenter', this.handleDragEnter);
-            zone.addEventListener('dragleave', this.handleDragLeave);
+        
+        fileElement.addEventListener('dragend', () => {
+            fileElement.classList.remove('dragging');
+            document.querySelectorAll('.workflow-zone').forEach(zone => {
+                zone.classList.remove('can-drop');
+            });
         });
     }
-
-    handleDragStart(e) {
-        e.dataTransfer.setData('text/plain', e.target.textContent.trim());
-        e.target.classList.add('dragging');
+    
+    // 設置區域放置事件
+    setupZoneDropEvents() {
+        const zones = ['workingZone', 'stagingZone', 'repositoryZone'];
         
-        // 高亮所有可放置區域
-        document.querySelectorAll('.drop-zone').forEach(zone => {
-            zone.classList.add('highlight-drop-zone');
+        zones.forEach(zoneId => {
+            const zone = document.getElementById(zoneId);
+            
+            zone.addEventListener('dragover', (e) => {
+                if (this.canDropInZone(zoneId)) {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                }
+            });
+            
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+            
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                
+                if (this.canDropInZone(zoneId)) {
+                    this.moveFileToZone(zoneId);
+                }
+            });
         });
-        
-        // 添加拖拉指引
-        this.showDragGuidance();
     }
-
-    handleDragEnd(e) {
-        e.target.classList.remove('dragging');
-        
-        // 移除所有高亮效果
-        document.querySelectorAll('.drop-zone').forEach(zone => {
-            zone.classList.remove('highlight-drop-zone', 'drag-over');
-        });
-        
-        // 移除拖拉指引
-        this.hideDragGuidance();
-    }
-
-    handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    }
-
-    handleDragEnter(e) {
-        e.preventDefault();
-        e.currentTarget.classList.add('drag-over');
-        
-        // 顯示區域說明
-        this.showDropZoneInfo(e.currentTarget);
-    }
-
-    handleDragLeave(e) {
-        // 只在真正離開元素時移除樣式
-        if (!e.currentTarget.contains(e.relatedTarget)) {
-            e.currentTarget.classList.remove('drag-over');
-            this.hideDropZoneInfo();
+    
+    // 檢查是否可以放置到指定區域
+    canDropInZone(zoneId) {
+        switch (zoneId) {
+            case 'stagingZone':
+                return this.workflowState.fileInWorkingDir;
+            case 'repositoryZone':
+                return this.workflowState.fileInStaging;
+            case 'workingZone':
+                return this.workflowState.fileInStaging; // 可以從暫存區拉回工作區
+            default:
+                return false;
         }
     }
-
-    handleDrop(e) {
-        e.preventDefault();
-        e.currentTarget.classList.remove('drag-over');
-        
-        const fileName = e.dataTransfer.getData('text/plain');
-        const targetZone = e.currentTarget.dataset.zone;
-        
-        // 顯示成功動畫
-        this.showDropSuccessAnimation(e.currentTarget, fileName);
-        
-        // 根據目標區域給予回饋
-        if (targetZone === 'staging') {
-            this.showMessage(`很好！${fileName} 已加入暫存區。這相當於執行 'git add ${fileName}'`, 'success');
-            this.moveFileToZone(fileName, 'staging');
-        } else if (targetZone === 'repository') {
-            if (this.hasFileInStaging(fileName)) {
-                this.showMessage(`完美！${fileName} 已提交到版本庫。這相當於執行 'git commit'`, 'success');
-                this.moveFileToZone(fileName, 'repository');
-            } else {
-                this.showMessage(`等等！檔案需要先加入暫存區才能提交。`, 'error');
-                this.showErrorAnimation(e.currentTarget);
-                return;
-            }
-        } else if (targetZone === 'working') {
-            this.showMessage(`${fileName} 在工作區中。你可以編輯這個檔案。`, 'info');
-            this.moveFileToZone(fileName, 'working');
-        }
-    }
-
-    // 顯示放置成功動畫
-    showDropSuccessAnimation(element, fileName) {
-        element.classList.add('drop-success');
-        
-        // 創建成功標記
-        const successMark = document.createElement('div');
-        successMark.className = 'drop-success-mark';
-        successMark.innerHTML = `✓ ${fileName}`;
-        element.appendChild(successMark);
-        
-        setTimeout(() => {
-            element.classList.remove('drop-success');
-            if (successMark.parentNode) {
-                successMark.remove();
-            }
-        }, 2000);
-    }
-
-    // 顯示錯誤動畫
-    showErrorAnimation(element) {
-        element.classList.add('drop-error');
-        setTimeout(() => {
-            element.classList.remove('drop-error');
-        }, 1000);
-    }
-
+    
     // 移動檔案到指定區域
-    moveFileToZone(fileName, zoneName) {
-        // 尋找包含指定檔案名稱的可拖拉元素
-        const draggableElements = document.querySelectorAll('[draggable="true"]');
-        let fileElement = null;
+    moveFileToZone(targetZoneId) {
+        const file = this.workflowState.currentFile;
+        if (!file) return;
         
-        for (const element of draggableElements) {
-            if (element.textContent.trim() === fileName) {
-                fileElement = element;
+        switch (targetZoneId) {
+            case 'stagingZone':
+                this.gitAdd();
                 break;
+            case 'repositoryZone':
+                if (this.workflowState.fileInStaging) {
+                    this.gitCommit();
+                }
+                break;
+            case 'workingZone':
+                if (this.workflowState.fileInStaging) {
+                    this.gitUnstage();
+                }
+                break;
+        }
+    }
+    
+    // Git add 操作
+    gitAdd() {
+        const file = this.workflowState.currentFile;
+        if (!file || !this.workflowState.fileInWorkingDir) return;
+        
+        // 移動檔案到暫存區
+        const stagingContent = document.getElementById('stagingContent');
+        file.querySelector('.file-status').textContent = '已暫存';
+        file.classList.add('staged');
+        stagingContent.appendChild(file);
+        
+        // 更新狀態
+        this.workflowState.fileInWorkingDir = false;
+        this.workflowState.fileInStaging = true;
+        
+        // 更新按鈕狀態
+        document.getElementById('addBtn').disabled = true;
+        document.getElementById('unstageBtn').disabled = false;
+        document.getElementById('commitBtn').disabled = false;
+        
+        // 顯示成功訊息
+        this.showMessage('✅ 檔案已加入暫存區！相當於執行 "git add index.html"', 'success');
+        
+        // 更新提示
+        document.getElementById('workflowHint').innerHTML = '<p>🎯 現在可以提交檔案到版本庫，或用 "git reset" 移回工作區</p>';
+    }
+    
+    // Git commit 操作
+    gitCommit() {
+        const file = this.workflowState.currentFile;
+        if (!file || !this.workflowState.fileInStaging) return;
+        
+        // 移動檔案到版本庫
+        const repositoryContent = document.getElementById('repositoryContent');
+        file.querySelector('.file-status').textContent = '已提交';
+        file.classList.remove('staged');
+        file.classList.add('committed');
+        repositoryContent.appendChild(file);
+        
+        // 更新狀態
+        this.workflowState.fileInStaging = false;
+        this.workflowState.fileInRepository = true;
+        
+        // 更新按鈕狀態
+        document.getElementById('commitBtn').disabled = true;
+        document.getElementById('unstageBtn').disabled = true;
+        
+        // 顯示成功訊息
+        this.showMessage('🎉 檔案已提交到版本庫！相當於執行 "git commit -m \'添加 index.html\'"', 'success');
+        
+        // 更新提示
+        document.getElementById('workflowHint').innerHTML = '<p>✅ 完成！檔案已安全保存在 Git 版本庫中</p>';
+    }
+    
+    // Git unstage 操作（從暫存區移回工作區）
+    gitUnstage() {
+        const file = this.workflowState.currentFile;
+        if (!file || !this.workflowState.fileInStaging) return;
+        
+        // 移動檔案回工作區
+        const workingContent = document.getElementById('workingContent');
+        file.querySelector('.file-status').textContent = '未追蹤';
+        file.classList.remove('staged');
+        workingContent.appendChild(file);
+        
+        // 更新狀態
+        this.workflowState.fileInStaging = false;
+        this.workflowState.fileInWorkingDir = true;
+        
+        // 更新按鈕狀態
+        document.getElementById('addBtn').disabled = false;
+        document.getElementById('unstageBtn').disabled = true;
+        document.getElementById('commitBtn').disabled = true;
+        
+        // 顯示訊息
+        this.showMessage('↩️ 檔案已移回工作區！相當於執行 "git reset HEAD index.html"', 'info');
+        
+        // 更新提示
+        document.getElementById('workflowHint').innerHTML = '<p>🎯 檔案回到工作區，可以重新執行 "git add" 加入暫存區</p>';
+    }
+    
+    // 重置工作流程
+    resetWorkflow() {
+        // 清空所有區域
+        document.getElementById('workingContent').innerHTML = '';
+        document.getElementById('stagingContent').innerHTML = '';
+        document.getElementById('repositoryContent').innerHTML = '';
+        
+        // 重置狀態
+        this.workflowState = {
+            fileInWorkingDir: false,
+            fileInStaging: false,
+            fileInRepository: false,
+            currentFile: null
+        };
+        
+        // 重置按鈕狀態
+        document.getElementById('addBtn').disabled = true;
+        document.getElementById('unstageBtn').disabled = true;
+        document.getElementById('commitBtn').disabled = true;
+        
+        // 顯示步驟1
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('gitWorkflow').style.display = 'none';
+        
+        // 顯示重置訊息
+        this.showMessage('🔄 工作流程已重置！可以重新開始體驗', 'info');
+    }
+    
+    // 更新遊戲存檔點的 current class
+    updateGameSavePoints(currentStage) {
+        const savePoints = document.querySelectorAll('.save-point');
+        savePoints.forEach((point, index) => {
+            point.classList.remove('current');
+            if (index === currentStage) {
+                point.classList.add('current');
+                // 添加高亮動畫
+                point.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    point.style.transform = 'scale(1)';
+                }, 300);
             }
-        }
-        
-        if (!fileElement) return;
-        
-        // 創建檔案副本在目標區域
-        const targetZone = document.querySelector(`[data-zone="${zoneName}"]`);
-        if (targetZone) {
-            // 移除之前的檔案副本
-            const existingFile = targetZone.querySelector('.file-in-zone');
-            if (existingFile) {
-                existingFile.remove();
-            }
-            
-            // 創建新的檔案副本
-            const fileClone = document.createElement('div');
-            fileClone.className = 'file-in-zone';
-            fileClone.textContent = fileName;
-            fileClone.innerHTML = `<i class="fas fa-file"></i> ${fileName}`;
-            
-            targetZone.appendChild(fileClone);
-            
-            // 添加成功動畫
-            fileClone.style.transform = 'scale(0) translateY(-20px)';
-            fileClone.style.opacity = '0';
-            setTimeout(() => {
-                fileClone.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                fileClone.style.transform = 'scale(1) translateY(0)';
-                fileClone.style.opacity = '1';
-            }, 100);
-            
-            // 添加區域高亮效果
-            targetZone.classList.add('zone-highlight');
-            setTimeout(() => {
-                targetZone.classList.remove('zone-highlight');
-            }, 1000);
-        }
+        });
     }
 
-    // 顯示拖拉指引
-    showDragGuidance() {
-        const guidance = document.createElement('div');
-        guidance.id = 'drag-guidance';
-        guidance.className = 'drag-guidance';
-        guidance.innerHTML = '拖拉檔案到不同區域來學習 Git 工作流程';
-        document.body.appendChild(guidance);
+    // 拖拉功能設定（已移除）
+    setupDragAndDrop() {
+        // 拖拉功能已移除，改用按鈕操作
+        console.log('拖拉功能已移除，使用按鈕操作');
     }
 
-    // 隱藏拖拉指引
-    hideDragGuidance() {
-        const guidance = document.getElementById('drag-guidance');
-        if (guidance) {
-            guidance.remove();
-        }
-    }
+    // 所有拖拉相關的處理函數已移除
 
-    // 顯示區域資訊
-    showDropZoneInfo(zone) {
-        const zoneName = zone.dataset.zone;
-        let info = '';
-        
-        switch(zoneName) {
-            case 'working':
-                info = '工作區：編輯檔案的地方';
-                break;
-            case 'staging':
-                info = '暫存區：準備提交的檔案';
-                break;
-            case 'repository':
-                info = '版本庫：已提交的檔案歷史';
-                break;
-        }
-        
-        const infoElement = document.createElement('div');
-        infoElement.id = 'zone-info';
-        infoElement.className = 'zone-info';
-        infoElement.textContent = info;
-        zone.appendChild(infoElement);
-    }
-
-    // 隱藏區域資訊
-    hideDropZoneInfo() {
-        const info = document.getElementById('zone-info');
-        if (info) {
-            info.remove();
-        }
-    }
-
-    hasFileInStaging(fileName) {
-        // 簡化版本，假設檔案已在暫存區
-        return true;
-    }
+    // 所有拖拉相關的輔助函數已移除
 
     // 終端機設定
     setupTerminal() {
@@ -887,8 +1021,20 @@ class GitLearningPlatform {
             this.advanceStep();
             this.addTerminalOutput('💡 檔案已加入暫存區！最後用 git commit 提交：git commit -m "我的第一次提交"', 'hint');
         } else if (command.startsWith('git commit')) {
+            console.log('git commit detected, advancing step'); // 調試用
             this.advanceStep();
             this.addTerminalOutput('🎉 恭喜！你完成了第一次 Git 提交！試試用 git log 查看歷史記錄。', 'success');
+            
+            // 顯示完成訊息和下一課按鈕
+            console.log('Setting timeout for completion'); // 調試用
+            
+            // 立即顯示按鈕（測試用）
+            this.showFirstCommitCompletion();
+            
+            // 也保留延遲版本以防需要
+            setTimeout(() => {
+                this.showFirstCommitCompletion();
+            }, 500);
         }
     }
 
@@ -907,23 +1053,315 @@ class GitLearningPlatform {
         }
     }
 
+    showFirstCommitCompletion() {
+        console.log('showFirstCommitCompletion called'); // 調試用
+        
+        // 顯示下一課按鈕
+        const nextButtonContainer = document.getElementById('firstCommitNextButton');
+        console.log('nextButtonContainer:', nextButtonContainer); // 調試用
+        
+        if (nextButtonContainer) {
+            nextButtonContainer.style.display = 'block';
+            nextButtonContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // 添加慶祝動畫
+            nextButtonContainer.classList.add('completion-celebration-appear');
+            
+            // 顯示成功訊息
+            this.showMessage('🎉 恭喜完成第一次 Git 提交教學！', 'success');
+        } else {
+            console.error('firstCommitNextButton element not found'); // 調試用
+        }
+    }
+
     // 分支視覺化
     setupBranchVisualization() {
         const diagram = document.getElementById('branchDiagram');
         if (!diagram) return;
 
-        this.branchData = {
-            commits: [
-                { id: 'A', message: '初始提交', branch: 'main', x: 100, y: 100 },
-                { id: 'B', message: '新增功能', branch: 'main', x: 200, y: 100 },
-                { id: 'C', message: '修正錯誤', branch: 'main', x: 300, y: 100 }
-            ],
-            branches: [
-                { name: 'main', commits: ['A', 'B', 'C'], color: '#667eea' }
-            ]
+        // 初始化分支狀態
+        this.branchState = {
+            currentBranch: 'main',
+            branches: new Map([
+                ['main', { commits: ['A', 'B', 'C'], color: '#667eea', active: true }]
+            ]),
+            commits: new Map([
+                ['A', { message: '初始提交', branch: 'main', x: 100, y: 100 }],
+                ['B', { message: '新增功能', branch: 'main', x: 200, y: 100 }],
+                ['C', { message: '修正錯誤', branch: 'main', x: 300, y: 100 }]
+            ])
         };
 
         this.renderBranchDiagram();
+        this.updateBranchDisplay();
+        
+        // 初始化任務進度
+        this.missionProgress = 0;
+        this.updateMissionProgress();
+    }
+
+    updateBranchDisplay() {
+        // 更新當前分支顯示
+        const currentBranchName = document.getElementById('currentBranchName');
+        if (currentBranchName) {
+            currentBranchName.textContent = this.branchState.currentBranch;
+        }
+
+        // 更新分支列表
+        this.updateBranchList();
+    }
+
+    updateBranchList() {
+        const branchesContainer = document.querySelector('.branches');
+        if (!branchesContainer) return;
+
+        branchesContainer.innerHTML = '';
+        
+        for (const [branchName, branchInfo] of this.branchState.branches) {
+            const branchItem = document.createElement('div');
+            branchItem.className = `branch-item ${branchName === this.branchState.currentBranch ? 'active' : ''}`;
+            branchItem.dataset.branch = branchName;
+            
+            branchItem.innerHTML = `
+                <i class="fas fa-circle"></i>
+                <span>${branchName}</span>
+                ${branchName === this.branchState.currentBranch ? '<span class="branch-status">當前</span>' : ''}
+            `;
+            
+            branchesContainer.appendChild(branchItem);
+        }
+    }
+
+    createNewBranch() {
+        const branchName = 'feature/login';
+        
+        if (this.branchState.branches.has(branchName)) {
+            this.showMessage('分支 feature/login 已經存在！請先切換到該分支。', 'info');
+            return;
+        }
+
+        // 建立新分支（從當前分支分岔）
+        this.branchState.branches.set(branchName, {
+            commits: ['A', 'B', 'C'], // 包含 main 分支的歷史
+            color: '#FF6B6B',
+            active: false
+        });
+
+        // 添加分支建立動畫
+        const currentDisplay = document.getElementById('currentBranchDisplay');
+        currentDisplay.classList.add('branch-switch-animation');
+        
+        setTimeout(() => {
+            currentDisplay.classList.remove('branch-switch-animation');
+        }, 1000);
+
+        this.updateBranchList();
+        this.renderBranchDiagram();
+        this.showMessage('🎉 成功建立分支 feature/login！', 'success');
+        
+        // 更新任務進度：完成任務1
+        this.completeMission(1);
+    }
+
+    switchCurrentBranch() {
+        const availableBranches = Array.from(this.branchState.branches.keys())
+            .filter(name => name !== this.branchState.currentBranch);
+        
+        if (availableBranches.length === 0) {
+            this.showMessage('沒有其他分支可以切換！請先建立新分支。', 'info');
+            return;
+        }
+
+        const targetBranch = availableBranches[0];
+        const oldBranch = this.branchState.currentBranch;
+        
+        // 切換分支
+        this.branchState.currentBranch = targetBranch;
+        
+        // 添加切換動畫
+        const currentDisplay = document.getElementById('currentBranchDisplay');
+        const branchName = document.getElementById('currentBranchName');
+        
+        currentDisplay.classList.add('branch-switch-animation');
+        
+        setTimeout(() => {
+            branchName.textContent = targetBranch;
+            this.updateBranchList();
+            currentDisplay.classList.remove('branch-switch-animation');
+        }, 500);
+
+        this.showMessage(`🔀 已切換到分支 ${targetBranch}！`, 'success');
+        
+        // 更新任務進度：完成任務2
+        this.completeMission(2);
+    }
+
+    makeCommitOnBranch() {
+        const currentBranch = this.branchState.currentBranch;
+        const branchInfo = this.branchState.branches.get(currentBranch);
+        
+        if (!branchInfo) return;
+
+        // 產生新的提交 ID
+        const existingCommitIds = Array.from(this.branchState.commits.keys());
+        const nextId = String.fromCharCode(65 + existingCommitIds.length); // A, B, C, D, E...
+        
+        // 計算新提交的位置
+        let newCommit;
+        if (currentBranch === 'main') {
+            const mainCommitCount = branchInfo.commits.filter(id => {
+                const commit = this.branchState.commits.get(id);
+                return commit && commit.branch === 'main';
+            }).length;
+            newCommit = {
+                message: '主線新功能',
+                branch: currentBranch,
+                x: 100 + mainCommitCount * 100,
+                y: 100
+            };
+        } else {
+            // feature 分支的提交
+            const featureCommitCount = branchInfo.commits.filter(id => {
+                const commit = this.branchState.commits.get(id);
+                return commit && commit.branch === currentBranch;
+            }).length;
+            newCommit = {
+                message: '分支功能開發',
+                branch: currentBranch,
+                x: 400 + featureCommitCount * 100,
+                y: 150
+            };
+        }
+        
+        this.branchState.commits.set(nextId, newCommit);
+        branchInfo.commits.push(nextId);
+        
+        this.renderBranchDiagram();
+        this.showMessage(`✅ 在分支 ${currentBranch} 上新增了提交 ${nextId}！`, 'success');
+        
+        // 更新任務進度：完成任務3
+        if (currentBranch !== 'main') {
+            this.completeMission(3);
+        }
+    }
+
+    mergeBranchToMain() {
+        if (this.branchState.currentBranch === 'main') {
+            this.showMessage('❌ 無法合併：當前已在 main 分支上！', 'error');
+            return;
+        }
+
+        const featureBranch = this.branchState.currentBranch;
+        const featureBranchInfo = this.branchState.branches.get(featureBranch);
+        const mainBranchInfo = this.branchState.branches.get('main');
+        
+        if (!featureBranchInfo || !mainBranchInfo) return;
+
+        // 添加合併動畫
+        const diagram = document.getElementById('branchDiagram');
+        diagram.classList.add('merge-animation');
+        
+        setTimeout(() => {
+            // 執行合併：創建合併提交
+            const mergeCommitId = 'M';
+            const mergeCommit = {
+                message: `合併 ${featureBranch}`,
+                branch: 'main',
+                x: 500, // 合併提交位置
+                y: 100
+            };
+            
+            this.branchState.commits.set(mergeCommitId, mergeCommit);
+            mainBranchInfo.commits.push(mergeCommitId);
+            
+            // 保持 feature 分支的提交不變，只是移除分支引用
+            
+            // 切換回 main 分支
+            this.branchState.currentBranch = 'main';
+            
+            // 移除已合併的分支
+            this.branchState.branches.delete(featureBranch);
+            
+            this.renderBranchDiagram();
+            this.updateBranchDisplay();
+            diagram.classList.remove('merge-animation');
+            
+            this.showMessage(`🎉 成功合併分支 ${featureBranch} 到 main！`, 'success');
+            
+            // 更新任務進度：完成任務4
+            this.completeMission(4);
+        }, 1000);
+    }
+
+    resetBranchDemo() {
+        // 重置分支狀態到初始狀態
+        this.branchState = {
+            currentBranch: 'main',
+            branches: new Map([
+                ['main', { commits: ['A', 'B', 'C'], color: '#667eea', active: true }]
+            ]),
+            commits: new Map([
+                ['A', { message: '初始提交', branch: 'main', x: 100, y: 100 }],
+                ['B', { message: '新增功能', branch: 'main', x: 200, y: 100 }],
+                ['C', { message: '修正錯誤', branch: 'main', x: 300, y: 100 }]
+            ])
+        };
+
+        this.renderBranchDiagram();
+        this.updateBranchDisplay();
+        this.showMessage('🔄 分支演示已重置！可以重新開始練習。', 'info');
+        
+        // 重置任務進度
+        this.missionProgress = 0;
+        this.updateMissionProgress();
+    }
+
+    completeMission(missionNumber) {
+        if (missionNumber > this.missionProgress) {
+            this.missionProgress = missionNumber;
+            this.updateMissionProgress();
+            this.showNextMission(missionNumber);
+        }
+    }
+
+    updateMissionProgress() {
+        const progressFill = document.getElementById('missionProgressFill');
+        const progressText = document.getElementById('missionProgressText');
+        
+        if (progressFill && progressText) {
+            const percentage = (this.missionProgress / 4) * 100;
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${this.missionProgress}/4 任務完成`;
+        }
+        
+        // 更新任務顯示
+        for (let i = 1; i <= 4; i++) {
+            const mission = document.getElementById(`mission${i}`);
+            if (mission) {
+                if (i <= this.missionProgress) {
+                    mission.classList.remove('hidden');
+                    mission.classList.add('mission-completed');
+                } else if (i === this.missionProgress + 1) {
+                    mission.classList.remove('hidden');
+                    mission.classList.remove('mission-completed');
+                } else {
+                    mission.classList.add('hidden');
+                }
+            }
+        }
+    }
+
+    showNextMission(completedMission) {
+        const missionMessages = {
+            1: '✅ 任務1完成！現在請切換到新建立的分支。',
+            2: '✅ 任務2完成！現在請在分支上進行提交。',
+            3: '✅ 任務3完成！現在請合併分支回主線。',
+            4: '🎉 所有任務完成！你已經掌握了完整的分支工作流程！'
+        };
+        
+        if (missionMessages[completedMission]) {
+            this.showMessage(missionMessages[completedMission], 'success');
+        }
     }
 
     renderBranchDiagram() {
@@ -932,18 +1370,18 @@ class GitLearningPlatform {
 
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '100%');
-        svg.setAttribute('height', '300');
-        svg.setAttribute('viewBox', '0 0 600 300');
+        svg.setAttribute('height', '350');
+        svg.setAttribute('viewBox', '0 0 650 350');
 
-        // 先繪製連接線（在提交點之下）
+        // 先繪製連接線
         this.drawBranchLines(svg);
 
         // 繪製提交點
-        this.branchData.commits.forEach(commit => {
-            // 根據分支決定顏色
-            const branchInfo = this.branchData.branches.find(b => b.name === commit.branch);
+        for (const [commitId, commit] of this.branchState.commits) {
+            const branchInfo = this.branchState.branches.get(commit.branch);
             const color = branchInfo ? branchInfo.color : '#667eea';
 
+            // 提交圓圈
             const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             circle.setAttribute('cx', commit.x);
             circle.setAttribute('cy', commit.y);
@@ -951,6 +1389,13 @@ class GitLearningPlatform {
             circle.setAttribute('fill', color);
             circle.setAttribute('stroke', '#fff');
             circle.setAttribute('stroke-width', '3');
+            circle.style.transition = 'all 0.3s ease';
+            
+            // 當前分支的提交點添加脈衝效果
+            if (commit.branch === this.branchState.currentBranch) {
+                circle.style.filter = 'drop-shadow(0 0 8px rgba(102, 126, 234, 0.6))';
+            }
+            
             svg.appendChild(circle);
 
             // 提交 ID
@@ -961,7 +1406,7 @@ class GitLearningPlatform {
             text.setAttribute('fill', 'white');
             text.setAttribute('font-size', '12');
             text.setAttribute('font-weight', 'bold');
-            text.textContent = commit.id;
+            text.textContent = commitId;
             svg.appendChild(text);
 
             // 提交訊息
@@ -973,102 +1418,189 @@ class GitLearningPlatform {
             message.setAttribute('font-size', '10');
             message.textContent = commit.message;
             svg.appendChild(message);
-        });
+        }
+
+        // 添加分支標籤
+        this.drawBranchLabels(svg);
 
         diagram.innerHTML = '';
         diagram.appendChild(svg);
     }
 
     drawBranchLines(svg) {
-        // 繪製 main 分支線
-        const mainCommits = this.branchData.commits.filter(c => c.branch === 'main');
-        for (let i = 0; i < mainCommits.length - 1; i++) {
-            const current = mainCommits[i];
-            const next = mainCommits[i + 1];
-            
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', current.x);
-            line.setAttribute('y1', current.y);
-            line.setAttribute('x2', next.x);
-            line.setAttribute('y2', next.y);
-            line.setAttribute('stroke', '#667eea');
-            line.setAttribute('stroke-width', '3');
-            svg.appendChild(line);
-        }
-
-        // 繪製 feature 分支線
-        const featureCommits = this.branchData.commits.filter(c => c.branch === 'feature');
-        if (featureCommits.length > 0) {
-            // 從 main 分支的 B 點繋接到 feature 分支
-            const branchPoint = this.branchData.commits.find(c => c.id === 'B');
-            const firstFeature = featureCommits[0];
-            
-            if (branchPoint && firstFeature) {
-                const branchLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                branchLine.setAttribute('x1', branchPoint.x);
-                branchLine.setAttribute('y1', branchPoint.y);
-                branchLine.setAttribute('x2', firstFeature.x);
-                branchLine.setAttribute('y2', firstFeature.y);
-                branchLine.setAttribute('stroke', '#4CAF50');
-                branchLine.setAttribute('stroke-width', '3');
-                svg.appendChild(branchLine);
+        // 先繪製 main 分支線 (A -> B -> C)
+        const mainBranch = this.branchState.branches.get('main');
+        if (mainBranch) {
+            // 只連接 main 分支上的原始提交 A, B, C
+            const baseMainCommits = ['A', 'B', 'C']
+                .map(id => this.branchState.commits.get(id))
+                .filter(commit => commit && commit.branch === 'main');
+                
+            for (let i = 0; i < baseMainCommits.length - 1; i++) {
+                const current = baseMainCommits[i];
+                const next = baseMainCommits[i + 1];
+                
+                if (current && next) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', current.x);
+                    line.setAttribute('y1', current.y);
+                    line.setAttribute('x2', next.x);
+                    line.setAttribute('y2', next.y);
+                    line.setAttribute('stroke', mainBranch.color);
+                    line.setAttribute('stroke-width', 'main' === this.branchState.currentBranch ? '4' : '3');
+                    line.setAttribute('opacity', '0.9');
+                    svg.appendChild(line);
+                }
             }
-
-            // feature 分支內的連接
+            
+            // 如果有合併提交，從 C 連接到 M
+            const cCommit = this.branchState.commits.get('C');
+            const mergeCommit = this.branchState.commits.get('M');
+            if (cCommit && mergeCommit) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', cCommit.x);
+                line.setAttribute('y1', cCommit.y);
+                line.setAttribute('x2', mergeCommit.x);
+                line.setAttribute('y2', mergeCommit.y);
+                line.setAttribute('stroke', mainBranch.color);
+                line.setAttribute('stroke-width', 'main' === this.branchState.currentBranch ? '4' : '3');
+                line.setAttribute('opacity', '0.9');
+                svg.appendChild(line);
+            }
+        }
+        
+        // 繪製 feature 分支（如果存在）
+        const featureBranch = this.branchState.branches.get('feature/login');
+        if (featureBranch) {
+            // 獲取 feature 分支上的所有提交
+            const featureCommits = featureBranch.commits
+                .map(id => this.branchState.commits.get(id))
+                .filter(commit => commit && commit.branch === 'feature/login');
+            
+            if (featureCommits.length > 0) {
+                const firstFeatureCommit = featureCommits[0];
+                // 從 C 點到 feature 分支第一個提交的分岔線
+                const branchCurve = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const d = `M 300 100 Q 350 125 ${firstFeatureCommit.x} ${firstFeatureCommit.y}`;
+                branchCurve.setAttribute('d', d);
+                branchCurve.setAttribute('stroke', featureBranch.color);
+                branchCurve.setAttribute('stroke-width', '3');
+                branchCurve.setAttribute('fill', 'none');
+                branchCurve.setAttribute('stroke-dasharray', '5,5');
+                branchCurve.setAttribute('opacity', '0.8');
+                svg.appendChild(branchCurve);
+            }
+            
+            // feature 分支上的提交連線（使用相同的 featureCommits 變數）
+                
             for (let i = 0; i < featureCommits.length - 1; i++) {
                 const current = featureCommits[i];
                 const next = featureCommits[i + 1];
                 
-                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                line.setAttribute('x1', current.x);
-                line.setAttribute('y1', current.y);
-                line.setAttribute('x2', next.x);
-                line.setAttribute('y2', next.y);
-                line.setAttribute('stroke', '#4CAF50');
-                line.setAttribute('stroke-width', '3');
-                svg.appendChild(line);
+                if (current && next) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', current.x);
+                    line.setAttribute('y1', current.y);
+                    line.setAttribute('x2', next.x);
+                    line.setAttribute('y2', next.y);
+                    line.setAttribute('stroke', featureBranch.color);
+                    line.setAttribute('stroke-width', 'feature/login' === this.branchState.currentBranch ? '4' : '3');
+                    line.setAttribute('opacity', '0.9');
+                    svg.appendChild(line);
+                }
+            }
+        }
+        
+        // 繪製合併線（如果有合併提交）
+        const mergeCommit = this.branchState.commits.get('M');
+        if (mergeCommit) {
+            // 從 feature 分支的最後一個提交到合併提交
+            const lastFeatureCommit = this.branchState.commits.get('D');
+            if (lastFeatureCommit) {
+                // 使用曲線效果的合併線
+                const curvePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const d = `M ${lastFeatureCommit.x} ${lastFeatureCommit.y} Q ${(lastFeatureCommit.x + mergeCommit.x) / 2} ${(lastFeatureCommit.y + mergeCommit.y) / 2 - 15} ${mergeCommit.x} ${mergeCommit.y}`;
+                curvePath.setAttribute('d', d);
+                curvePath.setAttribute('stroke', '#FF6B6B');
+                curvePath.setAttribute('stroke-width', '3');
+                curvePath.setAttribute('fill', 'none');
+                curvePath.setAttribute('stroke-dasharray', '5,5');
+                curvePath.setAttribute('opacity', '0.8');
+                svg.appendChild(curvePath);
+                
+                // 添加合併箭頭
+                const arrowHead = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                const arrowSize = 6;
+                const arrowX = mergeCommit.x - 15;
+                const arrowY = mergeCommit.y - 5;
+                
+                const points = `${arrowX},${arrowY} ${arrowX - 8},${arrowY - 4} ${arrowX - 8},${arrowY + 4}`;
+                arrowHead.setAttribute('points', points);
+                arrowHead.setAttribute('fill', '#4CAF50');
+                arrowHead.setAttribute('opacity', '0.9');
+                svg.appendChild(arrowHead);
             }
         }
     }
 
-    // 分支操作
-    createBranch() {
-        const newCommit = {
-            id: 'D',
-            message: '新功能開發',
-            branch: 'feature',
-            x: 200,
-            y: 180
-        };
-
-        this.branchData.commits.push(newCommit);
-        this.branchData.branches.push({
-            name: 'feature',
-            commits: ['B', 'D'],
-            color: '#4CAF50'
-        });
-
-        this.renderBranchDiagram();
-        this.showMessage('建立了新分支 "feature"！', 'success');
+    drawBranchLabels(svg) {
+        for (const [branchName, branchInfo] of this.branchState.branches) {
+            // 找到該分支的最新提交
+            const branchCommits = branchInfo.commits
+                .map(id => this.branchState.commits.get(id))
+                .filter(commit => commit && commit.branch === branchName);
+            
+            if (branchCommits.length === 0) continue;
+            
+            // 獲取最新提交的位置
+            const latestCommit = branchCommits[branchCommits.length - 1];
+            if (!latestCommit) continue;
+            
+            const labelX = latestCommit.x;
+            // 根據分支位置調整標籤高度，避免重疊
+            const labelY = branchName === 'main' ? latestCommit.y - 45 : latestCommit.y - 50;
+            
+            // 分支標籤背景
+            const labelBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            labelBg.setAttribute('x', labelX - 60);
+            labelBg.setAttribute('y', labelY - 12);
+            labelBg.setAttribute('width', '120');
+            labelBg.setAttribute('height', '22');
+            labelBg.setAttribute('fill', branchInfo.color);
+            labelBg.setAttribute('rx', '11');
+            labelBg.setAttribute('opacity', '0.95');
+            labelBg.setAttribute('stroke', '#fff');
+            labelBg.setAttribute('stroke-width', '2');
+            svg.appendChild(labelBg);
+            
+            // 分支標籤文字
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', labelX);
+            label.setAttribute('y', labelY - 1);
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('fill', 'white');
+            label.setAttribute('font-size', '11');
+            label.setAttribute('font-weight', 'bold');
+            
+            const labelText = branchName === this.branchState.currentBranch ? 
+                `${branchName} (當前)` : branchName;
+            label.textContent = labelText;
+            svg.appendChild(label);
+            
+            // 添加指向線（從標籤到提交點）
+            const pointer = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            pointer.setAttribute('x1', labelX);
+            pointer.setAttribute('y1', labelY + 10);
+            pointer.setAttribute('x2', labelX);
+            pointer.setAttribute('y2', latestCommit.y - 18);
+            pointer.setAttribute('stroke', branchInfo.color);
+            pointer.setAttribute('stroke-width', '2');
+            pointer.setAttribute('opacity', '0.7');
+            svg.appendChild(pointer);
+        }
     }
 
-    switchBranch() {
-        this.showMessage('已切換到 feature 分支！', 'info');
-    }
-
-    makeBranchCommit() {
-        const newCommit = {
-            id: 'E',
-            message: '完成功能',
-            branch: 'feature',
-            x: 300,
-            y: 180
-        };
-
-        this.branchData.commits.push(newCommit);
-        this.renderBranchDiagram();
-        this.showMessage('在 feature 分支上建立了新提交！', 'success');
-    }
+    // 舊方法已移除，使用上面的新實作
 
     // 合併模擬器初始化
     initMergeSimulator() {
@@ -1310,57 +1842,13 @@ class GitLearningPlatform {
         }
     }
 
-    // 添加導航按鈕到課程頁面
-    addNavigationButtons() {
-        const lessons = ['welcome', 'what-is-git', 'basic-concepts', 'first-commit', 'branches', 'merging'];
-        const currentIndex = lessons.indexOf(this.currentLesson);
-        
-        // 移除現有的導航按鈕
-        document.querySelectorAll('.lesson-navigation').forEach(nav => nav.remove());
-        
-        const activeLesson = document.querySelector('.lesson-content.active');
-        if (activeLesson) {
-            const navContainer = document.createElement('div');
-            navContainer.className = 'lesson-navigation';
-            
-            // 上一課按鈕
-            if (currentIndex > 0) {
-                const prevButton = document.createElement('button');
-                prevButton.className = 'nav-button prev-button';
-                prevButton.innerHTML = '← 上一課';
-                prevButton.onclick = () => this.previousLesson();
-                navContainer.appendChild(prevButton);
-            }
-            
-            // 下一課按鈕
-            if (currentIndex < lessons.length - 1) {
-                const nextButton = document.createElement('button');
-                nextButton.className = 'nav-button next-button';
-                nextButton.innerHTML = '下一課 →';
-                nextButton.onclick = () => this.nextLesson();
-                navContainer.appendChild(nextButton);
-            }
-            
-            activeLesson.appendChild(navContainer);
-        }
-    }
 
     // 進度更新
     updateProgress() {
-        const totalLessons = 5; // welcome, what-is-git, basic-concepts, first-commit, branches
+        const totalLessons = 6; // welcome, what-is-git, basic-concepts, first-commit, branches, merging
         const completed = this.completedLessons.size;
         const progressPercent = Math.min((completed / totalLessons) * 100, 100);
         
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        
-        if (progressFill && progressText) {
-            progressFill.style.width = `${progressPercent}%`;
-            progressText.textContent = `${Math.round(progressPercent)}%`;
-            
-            // 動畫效果
-            progressFill.style.transition = 'width 0.5s ease-in-out';
-        }
         
         // 更新側邊欄完成狀態
         this.updateSidebarCompletionStatus();
@@ -1415,10 +1903,6 @@ function startLearning() {
     platform.switchToLesson('what-is-git');
 }
 
-function nextLesson() {
-    const platform = window.gitPlatform;
-    platform.nextLesson();
-}
 
 function restartCourse() {
     const platform = window.gitPlatform;
@@ -1446,6 +1930,78 @@ function makeBranchCommit() {
     const platform = window.gitPlatform;
     if (platform) {
         platform.makeBranchCommit();
+    }
+}
+
+// Git 工作流程全域函數
+function createNewFile() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.createNewFile();
+    }
+}
+
+function gitAdd() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.gitAdd();
+    }
+}
+
+function gitCommit() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.gitCommit();
+    }
+}
+
+function gitUnstage() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.gitUnstage();
+    }
+}
+
+function resetWorkflow() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.resetWorkflow();
+    }
+}
+
+// 分支操作函數
+function createBranch() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.createNewBranch();
+    }
+}
+
+function switchBranch() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.switchCurrentBranch();
+    }
+}
+
+function makeBranchCommit() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.makeCommitOnBranch();
+    }
+}
+
+function mergeBranch() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.mergeBranchToMain();
+    }
+}
+
+function resetBranchDemo() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.resetBranchDemo();
     }
 }
 
@@ -1484,6 +2040,170 @@ document.addEventListener('DOMContentLoaded', () => {
 // 鍵盤快捷鍵提示
 document.addEventListener('keydown', (e) => {
     if (e.key === '?' && e.shiftKey) {
-        alert('鍵盤快捷鍵：\nCtrl + → : 下一課\nCtrl + ← : 上一課\nEnter : 執行終端機命令');
+        alert('鍵盤快捷鍵：\nEnter : 執行終端機命令');
     }
 });
+
+// 合併分支功能
+function simulateFastForward() {
+    const visualization = document.getElementById('mergeVisualization');
+    
+    visualization.innerHTML = `
+        <div class="merge-scenario">
+            <h4>📋 Fast-Forward 合併</h4>
+            <div class="scenario-explanation">
+                <p>當目標分支是線性發展時，Git 只需要移動指針即可。</p>
+            </div>
+            <div class="merge-diagram">
+                <div class="commit-line">
+                    <div class="commit">A</div>
+                    <div class="commit">B</div>
+                    <div class="commit current">C</div>
+                    <div class="branch-pointer main">main</div>
+                </div>
+                <div class="merge-arrow">↓ Fast-Forward</div>
+                <div class="commit-line">
+                    <div class="commit">A</div>
+                    <div class="commit">B</div>
+                    <div class="commit current">C</div>
+                    <div class="branch-pointer main moved">main</div>
+                </div>
+            </div>
+            <div class="scenario-commands">
+                <code>git checkout main</code><br>
+                <code>git merge feature-branch</code>
+            </div>
+        </div>
+    `;
+    
+    // 添加動畫效果
+    setTimeout(() => {
+        const movedPointer = visualization.querySelector('.moved');
+        if (movedPointer) {
+            movedPointer.style.transform = 'translateX(0)';
+        }
+    }, 100);
+}
+
+function simulateThreeWayMerge() {
+    const visualization = document.getElementById('mergeVisualization');
+    
+    visualization.innerHTML = `
+        <div class="merge-scenario">
+            <h4>🔀 Three-way 合併</h4>
+            <div class="scenario-explanation">
+                <p>當兩個分支都有新提交時，Git 會創建一個新的合併提交。</p>
+            </div>
+            <div class="merge-diagram three-way">
+                <div class="branch-line main-line">
+                    <div class="commit">A</div>
+                    <div class="commit">B</div>
+                    <div class="commit">C</div>
+                    <div class="commit merge">M</div>
+                    <div class="branch-pointer main">main</div>
+                </div>
+                <div class="branch-line feature-line">
+                    <div class="commit">D</div>
+                    <div class="commit">E</div>
+                    <div class="branch-pointer feature">feature</div>
+                </div>
+            </div>
+            <div class="scenario-commands">
+                <code>git checkout main</code><br>
+                <code>git merge feature-branch</code><br>
+                <code># 自動創建合併提交</code>
+            </div>
+        </div>
+    `;
+}
+
+function simulateConflict() {
+    const visualization = document.getElementById('mergeVisualization');
+    const conflictSection = document.getElementById('conflictSection');
+    
+    visualization.innerHTML = `
+        <div class="merge-scenario conflict">
+            <h4>⚠️ 合併衝突</h4>
+            <div class="scenario-explanation">
+                <p>當兩個分支修改同一檔案的同一部分時，會發生衝突。</p>
+            </div>
+            <div class="conflict-indicator">
+                <div class="conflict-file">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>index.html 有衝突</span>
+                </div>
+                <div class="conflict-status">
+                    需要手動解決衝突
+                </div>
+            </div>
+            <div class="scenario-commands">
+                <code>git checkout main</code><br>
+                <code>git merge feature-branch</code><br>
+                <code style="color: #dc3545;"># CONFLICT: 需要手動解決</code>
+            </div>
+        </div>
+    `;
+    
+    // 顯示衝突解決部分
+    conflictSection.style.display = 'block';
+    conflictSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+function resolveConflictDemo() {
+    const editor = document.getElementById('conflictEditor');
+    
+    // 模擬解決過程
+    editor.innerHTML = `
+        <pre><code>正在解決衝突...
+
+原始版本：
+<<<<<<< HEAD (main 分支)
+歡迎使用我們的應用程式！
+=======
+歡迎使用我們的網站！
+>>>>>>> feature-branch (功能分支)
+</code></pre>
+    `;
+    
+    setTimeout(() => {
+        editor.innerHTML = `
+            <pre><code>解決後：
+
+歡迎使用我們的應用程式和網站！
+
+# 衝突已解決，可以進行提交
+# git add index.html
+# git commit -m "Resolve merge conflict"</code></pre>
+        `;
+        
+        // 顯示成功訊息
+        const platform = window.gitPlatform;
+        if (platform) {
+            platform.showMessage('✅ 衝突已成功解決！這是團隊協作中非常重要的技能。', 'success');
+        }
+    }, 2000);
+}
+
+function showCertificate() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.showMessage('🎆 恭喜！你已獲得 Git 基礎學習證書！繼續在實際專案中練習吧！', 'success');
+    }
+    
+    // 可以在這裡添加生成證書的逻輯
+    setTimeout(() => {
+        if (confirm('是否要重新開始課程來復習？')) {
+            restartCourse();
+        }
+    }, 2000);
+}
+
+function restartCourse() {
+    const platform = window.gitPlatform;
+    if (platform) {
+        platform.switchToLesson('welcome');
+        platform.completedLessons.clear();
+        platform.updateProgress();
+        platform.showMessage('🔄 課程已重新開始！', 'info');
+    }
+}

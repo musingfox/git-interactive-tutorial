@@ -11,12 +11,6 @@
     <nav class="navbar">
         <div class="nav-container">
             <h1><i class="fab fa-git-alt"></i> Git 互動學習</h1>
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <span class="progress-text" id="progressText">0%</span>
-            </div>
         </div>
     </nav>
 
@@ -92,9 +86,9 @@
                         <h3>🎮 想像 Git 就像遊戲存檔</h3>
                         <div class="analogy-visual" id="gameAnalogy">
                             <div class="save-points">
-                                <div class="save-point">存檔1: 新手村</div>
+                                <div class="save-point current">存檔1: 新手村</div>
                                 <div class="save-point">存檔2: 第一個任務</div>
-                                <div class="save-point current">存檔3: 擊敗大魔王</div>
+                                <div class="save-point">存檔3: 擊敗大魔王</div>
                             </div>
                         </div>
                         <p>Git 讓你可以為你的專案建立「存檔點」，隨時回到之前的狀態！</p>
@@ -107,15 +101,10 @@
                         <!-- 動畫將在這裡顯示檔案演變過程 -->
                     </div>
                     <button class="demo-button" onclick="startFileEvolution()">
-                        看看檔案如何演變
+                        🎮 開始互動體驗
                     </button>
                 </div>
 
-                <div class="next-button-container">
-                    <button class="next-button" onclick="nextLesson()">
-                        下一課：基本概念 <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
             </div>
 
             <!-- 基本概念頁面 -->
@@ -152,26 +141,93 @@
                 </div>
 
                 <div class="interactive-exercise">
-                    <h3>🎯 互動練習：拖拉檔案</h3>
-                    <p>試試看將檔案從一個區域拖到另一個區域！</p>
-                    <div class="drag-exercise" id="dragExercise">
-                        <div class="file-item draggable" draggable="true">
-                            <i class="fas fa-file-code"></i>
-                            index.html
+                    <h3>🎯 Git 工作流程體驗</h3>
+                    <p>跟著步驟體驗完整的 Git 工作流程：</p>
+                    
+                    <!-- 步驟1：建立檔案 -->
+                    <div class="workflow-step" id="step1">
+                        <h4>步驟 1：建立新檔案</h4>
+                        <p>在專案中建立一個新檔案</p>
+                        <button class="action-button" id="createFileBtn" onclick="createNewFile()">
+                            <i class="fas fa-plus"></i> 建立 index.html
+                        </button>
+                    </div>
+
+                    <!-- Git 工作區域視覺化 -->
+                    <div class="git-workflow" id="gitWorkflow" style="display: none;">
+                        <div class="workflow-zones">
+                            <div class="workflow-zone working-zone" id="workingZone">
+                                <div class="zone-header">
+                                    <h4><i class="fas fa-edit"></i> 工作區</h4>
+                                    <p>未追蹤的檔案</p>
+                                </div>
+                                <div class="zone-content" id="workingContent">
+                                    <!-- 檔案會動態出現在這裡 -->
+                                </div>
+                                <div class="zone-command">
+                                    <code>git add index.html</code>
+                                    <small>將檔案加入暫存區</small>
+                                </div>
+                            </div>
+
+                            <div class="workflow-zone staging-zone" id="stagingZone">
+                                <div class="zone-header">
+                                    <h4><i class="fas fa-clock"></i> 暫存區</h4>
+                                    <p>準備提交的檔案</p>
+                                </div>
+                                <div class="zone-content" id="stagingContent">
+                                    <!-- 檔案移動到這裡 -->
+                                </div>
+                                <div class="zone-command">
+                                    <code>git commit -m "添加首頁"</code>
+                                    <small>提交到版本庫</small>
+                                    <hr style="margin: 0.5rem 0; border: 1px solid #eee;">
+                                    <code>git reset HEAD index.html</code>
+                                    <small>移回工作區</small>
+                                </div>
+                            </div>
+
+                            <div class="workflow-zone repository-zone" id="repositoryZone">
+                                <div class="zone-header">
+                                    <h4><i class="fas fa-archive"></i> 版本庫</h4>
+                                    <p>已提交的版本</p>
+                                </div>
+                                <div class="zone-content" id="repositoryContent">
+                                    <!-- 檔案最終到這裡 -->
+                                </div>
+                                <div class="zone-command">
+                                    <code>git log --oneline</code>
+                                    <small>查看提交歷史</small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="drop-zones">
-                            <div class="drop-zone" data-zone="working">工作區</div>
-                            <div class="drop-zone" data-zone="staging">暫存區</div>
-                            <div class="drop-zone" data-zone="repository">版本庫</div>
+
+                        <!-- 互動提示 -->
+                        <div class="workflow-hint" id="workflowHint">
+                            <p>🎯 點擊按鈕體驗 Git 工作流程</p>
+                        </div>
+
+                        <!-- 操作按鈕 -->
+                        <div class="workflow-actions" id="workflowActions">
+                            <button class="git-command-btn" id="addBtn" onclick="gitAdd()" disabled>
+                                <i class="fas fa-plus"></i> git add
+                                <span class="btn-description">工作區 → 暫存區</span>
+                            </button>
+                            <button class="git-command-btn" id="unstageBtn" onclick="gitUnstage()" disabled>
+                                <i class="fas fa-minus"></i> git reset
+                                <span class="btn-description">暫存區 → 工作區</span>
+                            </button>
+                            <button class="git-command-btn" id="commitBtn" onclick="gitCommit()" disabled>
+                                <i class="fas fa-check"></i> git commit
+                                <span class="btn-description">暫存區 → 版本庫</span>
+                            </button>
+                            <button class="git-command-btn" id="resetBtn" onclick="resetWorkflow()">
+                                <i class="fas fa-undo"></i> 重新開始
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="next-button-container">
-                    <button class="next-button" onclick="nextLesson()">
-                        下一課：第一次提交 <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
             </div>
 
             <!-- 第一次提交頁面 -->
@@ -240,6 +296,7 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
 
             <!-- 分支操作頁面 -->
@@ -248,13 +305,47 @@
                 
                 <div class="branch-visualization">
                     <h3>🌳 分支視覺化</h3>
+                    
+                    <!-- 當前分支顯示 -->
+                    <div class="current-branch-display" id="currentBranchDisplay">
+                        <i class="fas fa-code-branch"></i>
+                        <span>當前分支：</span>
+                        <span class="branch-name" id="currentBranchName">main</span>
+                        <div class="branch-indicator"></div>
+                    </div>
+                    
                     <div class="branch-diagram" id="branchDiagram">
                         <!-- SVG 分支圖將在這裡動態生成 -->
                     </div>
+                    
+                    <!-- 分支列表 -->
+                    <div class="branch-list" id="branchList">
+                        <h4>可用分支：</h4>
+                        <div class="branches">
+                            <div class="branch-item active" data-branch="main">
+                                <i class="fas fa-circle"></i>
+                                <span>main</span>
+                                <span class="branch-status">當前</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="branch-controls">
-                        <button onclick="createBranch()">建立新分支</button>
-                        <button onclick="switchBranch()">切換分支</button>
-                        <button onclick="makeBranchCommit()">在分支上提交</button>
+                        <button class="branch-btn" onclick="createBranch()">
+                            <i class="fas fa-plus"></i> 建立新分支
+                        </button>
+                        <button class="branch-btn" onclick="switchBranch()">
+                            <i class="fas fa-exchange-alt"></i> 切換分支
+                        </button>
+                        <button class="branch-btn" onclick="makeBranchCommit()">
+                            <i class="fas fa-plus-circle"></i> 在分支上提交
+                        </button>
+                        <button class="branch-btn merge-btn" onclick="mergeBranch()">
+                            <i class="fas fa-code-merge"></i> 合併分支
+                        </button>
+                        <button class="branch-btn" onclick="resetBranchDemo()" style="background: linear-gradient(135deg, #6c757d, #495057);">
+                            <i class="fas fa-undo"></i> 重新開始
+                        </button>
                     </div>
                 </div>
 
@@ -296,27 +387,129 @@
             <div class="lesson-content" id="merging">
                 <h2>合併分支：把所有努力整合起來</h2>
                 
-                <div class="merge-simulator">
-                    <h3>🔄 合併模擬器</h3>
-                    <div class="merge-visualization" id="mergeVisualization">
-                        <!-- 合併動畫將在這裡顯示 -->
+                <div class="merge-concept-intro">
+                    <h3>🤝 什麼是合併？</h3>
+                    <p>合併就是將兩個分支的歷史結合在一起。想像你和同事各自在不同的分支上開發功能，最後需要將所有修改整合到主分支上。</p>
+                    
+                    <div class="merge-types">
+                        <div class="merge-type">
+                            <h4>📋 Fast-Forward 合併</h4>
+                            <p>當目標分支是線性發展時，只需要移動指針</p>
+                        </div>
+                        <div class="merge-type">
+                            <h4>🔀 Three-way 合併</h4>
+                            <p>當两個分支都有新提交時，創建合併提交</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="conflict-resolution">
+                <div class="merge-simulator">
+                    <h3>🔄 互動合併模擬器</h3>
+                    <p>點擊下方按鈕來体驗不同的合併情境：</p>
+                    
+                    <div class="merge-controls">
+                        <button class="demo-button" onclick="simulateFastForward()">
+                            <i class="fas fa-fast-forward"></i>
+                            Fast-Forward 合併
+                        </button>
+                        <button class="demo-button" onclick="simulateThreeWayMerge()">
+                            <i class="fas fa-code-branch"></i>
+                            Three-way 合併
+                        </button>
+                        <button class="demo-button" onclick="simulateConflict()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            衝突解決
+                        </button>
+                    </div>
+                    
+                    <div class="merge-visualization" id="mergeVisualization">
+                        <div class="scenario-display">
+                            <h4>選擇上方按鈕開始模擬合併情境</h4>
+                            <p>每種合併類型都有不同的處理方式和結果</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="conflict-resolution" style="display: none;" id="conflictSection">
                     <h3>⚔️ 解決合併衝突</h3>
-                    <p>學習如何處理兩個分支修改同一個檔案的情況</p>
-                    <div class="conflict-editor" id="conflictEditor">
-                        <!-- 衝突解決編輯器 -->
+                    <p>當兩個分支修改同一檔案的同一部分時，Git 無法自動合併，需要你手動解決衝突。</p>
+                    
+                    <div class="conflict-example">
+                        <h4>衝突示例：</h4>
+                        <div class="conflict-editor" id="conflictEditor">
+                            <pre><code><<<<<<< HEAD (main 分支)
+歡迎使用我們的應用程式！
+=======
+歡迎使用我們的網站！
+>>>>>>> feature-branch (功能分支)
+</code></pre>
+                        </div>
+                        
+                        <div class="conflict-resolution-steps">
+                            <h4>解決步驟：</h4>
+                            <ol>
+                                <li>查看衝突標記 (&lt;&lt;&lt;&lt;&lt;&lt;&lt;, =======, &gt;&gt;&gt;&gt;&gt;&gt;&gt;)</li>
+                                <li>決定保留哪一版本或合併兩者</li>
+                                <li>移除衝突標記</li>
+                                <li>測試修改的程式碼</li>
+                                <li>提交解決方案</li>
+                            </ol>
+                        </div>
+                        
+                        <button class="demo-button" onclick="resolveConflictDemo()">
+                            <i class="fas fa-tools"></i>
+                            模擬解決衝突
+                        </button>
+                    </div>
+                </div>
+
+                <div class="merge-best-practices">
+                    <h3>🎆 合併最佳實踐</h3>
+                    <div class="practice-grid">
+                        <div class="practice-item">
+                            <i class="fas fa-sync-alt"></i>
+                            <h4>定期同步</h4>
+                            <p>經常從主分支拉取最新修改</p>
+                        </div>
+                        <div class="practice-item">
+                            <i class="fas fa-microscope"></i>
+                            <h4>小量提交</h4>
+                            <p>保持提交粒度細小以減少衝突</p>
+                        </div>
+                        <div class="practice-item">
+                            <i class="fas fa-comments"></i>
+                            <h4>清楚溝通</h4>
+                            <p>與團隊溝通修改計畫避免衝突</p>
+                        </div>
+                        <div class="practice-item">
+                            <i class="fas fa-vial"></i>
+                            <h4>充分測試</h4>
+                            <p>合併前確保所有測試通過</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="completion-section">
-                    <h3>🎉 恭喜完成！</h3>
-                    <p>你已經掌握了 Git 的基本概念和操作。繼續練習讓技能更熟練吧！</p>
-                    <button class="restart-button" onclick="restartCourse()">
-                        重新開始課程
-                    </button>
+                    <h3>🎉 恭喜完成 Git 學習之旅！</h3>
+                    <p>你已經掌握了 Git 的核心概念：</p>
+                    <ul>
+                        <li>✅ 版本控制的基本概念</li>
+                        <li>✅ 基本 Git 命令操作</li>
+                        <li>✅ 分支的創建和管理</li>
+                        <li>✅ 合併分支和解決衝突</li>
+                    </ul>
+                    <p>繼續練習讓你的 Git 技能更加精湛！</p>
+                    
+                    <div class="final-actions">
+                        <button class="restart-button" onclick="restartCourse()">
+                            <i class="fas fa-redo"></i>
+                            重新開始課程
+                        </button>
+                        <button class="demo-button" onclick="showCertificate()">
+                            <i class="fas fa-certificate"></i>
+                            獲取完成證書
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>

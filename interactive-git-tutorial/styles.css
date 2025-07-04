@@ -41,32 +41,6 @@ body {
     gap: 0.5rem;
 }
 
-.progress-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.progress-bar {
-    width: 200px;
-    height: 8px;
-    background: #e0e0e0;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    width: 0%;
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-weight: bold;
-    color: #764ba2;
-    min-width: 40px;
-}
 
 /* 主要容器 */
 .main-container {
@@ -587,10 +561,6 @@ body {
 }
 
 /* 按鈕樣式 */
-.next-button-container {
-    text-align: center;
-    margin: 3rem 0;
-}
 
 .next-button, .demo-button, .restart-button {
     background: linear-gradient(135deg, #667eea, #764ba2);
@@ -642,10 +612,6 @@ body {
         text-align: center;
     }
     
-    .progress-container {
-        width: 100%;
-        justify-content: center;
-    }
     
     .hero-section h2 {
         font-size: 2rem;
@@ -1265,53 +1231,1075 @@ body {
 }
 
 /* 課程導航按鈕 */
-.lesson-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 3rem 0 2rem 0;
-    padding: 2rem 0;
-    border-top: 2px solid rgba(255, 255, 255, 0.2);
-}
 
-.nav-button {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 25px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+/* 增強拖拉練習視覺效果 */
+.file-in-zone {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: relative;
+    transition: all 0.3s ease;
 }
 
-.nav-button:hover {
+.file-in-zone:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.nav-button:active {
-    transform: translateY(0);
+.file-status-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #28a745;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
 }
 
-.prev-button {
-    background: linear-gradient(135deg, #6c757d, #5a6268);
+.zone-file-added {
+    background: rgba(40, 167, 69, 0.1) !important;
+    border-color: #28a745 !important;
+    animation: zone-pulse 0.6s ease-in-out;
 }
 
-.prev-button:hover {
-    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+@keyframes zone-pulse {
+    0% {
+        transform: scale(1);
+        background: rgba(40, 167, 69, 0.1);
+    }
+    50% {
+        transform: scale(1.02);
+        background: rgba(40, 167, 69, 0.2);
+    }
+    100% {
+        transform: scale(1);
+        background: rgba(40, 167, 69, 0.1);
+    }
 }
 
-.next-button {
-    margin-left: auto;
+.celebration-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particle-float 1s ease-out forwards;
 }
 
-/* 當只有一個按鈕時居中顯示 */
-.lesson-navigation:has(> .nav-button:only-child) {
+@keyframes particle-float {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* 檔案演變動畫樣式 */
+.version-progress {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: version-badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes version-badge-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+}
+
+.file-version {
+    position: relative;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.version-tag {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-bottom: 0.8rem;
+    display: inline-block;
+}
+
+.file-preview {
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.file-header {
+    background: #e9ecef;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    border-bottom: 1px solid #ddd;
+}
+
+.file-content {
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.demo-button:disabled {
+    background: #6c757d !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+/* 遊戲存檔點樣式 */
+.save-point {
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    margin: 0.3rem 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+}
+
+.save-point.current {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    font-weight: bold;
+}
+
+.save-point.interactive {
+    position: relative;
+    user-select: none;
+}
+
+.save-point.interactive:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.save-point.interactive.current:hover {
+    transform: scale(1.02);
+}
+
+/* 互動提示樣式 */
+.interaction-hint {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    margin: 1rem 0;
+    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+    animation: hint-pulse 2s ease-in-out infinite;
+}
+
+.interaction-hint p {
+    margin: 0.3rem 0;
+}
+
+.interaction-hint strong {
+    font-size: 1.1em;
+}
+
+@keyframes hint-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(240, 147, 251, 0.4);
+    }
+}
+
+/* Git 工作流程樣式 */
+.workflow-step {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.action-button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+}
+
+.git-workflow {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.workflow-zones {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.workflow-zone {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 1rem;
+    min-height: 180px;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.workflow-zone.can-drop {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    transform: scale(1.02);
+}
+
+.workflow-zone.drag-over {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.working-zone {
+    border-color: #ffc107;
+}
+
+.staging-zone {
+    border-color: #fd7e14;
+}
+
+.repository-zone {
+    border-color: #28a745;
+}
+
+.zone-header {
+    text-align: center;
+    margin-bottom: 0.8rem;
+}
+
+.zone-header h4 {
+    margin: 0;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.zone-header p {
+    margin: 0.2rem 0 0 0;
+    color: #666;
+    font-size: 0.75rem;
+}
+
+.zone-content {
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    flex: 1;
+    margin-bottom: 1rem;
+}
+
+.zone-command {
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: auto;
+}
+
+.zone-command code {
+    display: block;
+    color: #4fc3f7;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+}
+
+.zone-command small {
+    display: block;
+    color: #e0e0e0;
+    font-size: 0.65rem;
+    font-family: Arial, sans-serif;
+    opacity: 0.8;
+}
+
+.zone-command hr {
+    margin: 0.4rem 0 !important;
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.workflow-file {
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    padding: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    min-width: 100px;
+    max-width: 120px;
+    margin: 0.5rem auto;
+}
+
+.workflow-file:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.workflow-file.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.workflow-file.staged {
+    border-color: #fd7e14;
+    background: rgba(253, 126, 20, 0.1);
+}
+
+.workflow-file.committed {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.workflow-file i {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+    color: #667eea;
+}
+
+.workflow-file span {
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+}
+
+.file-status {
+    font-size: 0.7rem;
+    color: #666;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 10px;
+}
+
+.workflow-hint {
+    text-align: center;
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid #667eea;
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin: 1rem 0;
+    color: #333;
+}
+
+.workflow-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.git-command-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 120px;
+    position: relative;
+}
+
+.git-command-btn .btn-description {
+    font-size: 0.7rem;
+    font-weight: normal;
+    opacity: 0.8;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.git-command-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.git-command-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.git-command-btn i {
+    margin-right: 0.3rem;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .workflow-zones {
+        flex-direction: column;
+    }
+    
+    .workflow-zone {
+        min-height: 140px;
+    }
+    
+    .zone-content {
+        min-height: 60px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .workflow-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .git-command-btn {
+        width: 150px;
+    }
+    
+    .zone-command {
+        font-size: 0.7rem;
+        padding: 0.4rem;
+    }
+}
+
+/* 完成訊息樣式 */
+.completion-message {
+    text-align: center;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.completion-message h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.completion-message p {
+    margin: 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.completion-celebration-appear {
+    animation: completion-appear 0.8s ease-out;
+}
+
+@keyframes completion-appear {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    50% {
+        transform: translateY(-5px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 分支視覺化樣式 */
+.current-branch-display {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.current-branch-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: branch-shine 3s ease-in-out infinite;
+}
+
+.branch-name {
+    font-weight: bold;
+    font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+}
+
+.branch-indicator {
+    width: 10px;
+    height: 10px;
+    background: #4CAF50;
+    border-radius: 50%;
+    animation: branch-pulse 2s ease-in-out infinite;
+}
+
+@keyframes branch-shine {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+@keyframes branch-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.branch-list {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid #e0e0e0;
+}
+
+.branch-list h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.branches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.branch-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.branch-item.active {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border-color: #4CAF50;
+    transform: scale(1.05);
+}
+
+.branch-item:not(.active):hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.branch-item i {
+    font-size: 0.8rem;
+}
+
+.branch-status {
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+}
+
+.branch-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.branch-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.branch-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.branch-btn.merge-btn {
+    background: linear-gradient(135deg, #FF6B6B, #FF5252);
+}
+
+.branch-btn.merge-btn:hover {
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+/* 分支切換動畫 */
+.branch-switch-animation {
+    animation: branch-switch 1s ease-in-out;
+}
+
+@keyframes branch-switch {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(5deg); }
+    50% { transform: scale(1.05) rotate(-2deg); }
+    75% { transform: scale(1.02) rotate(1deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+/* 合併動畫 */
+.merge-animation {
+    animation: merge-effect 2s ease-in-out;
+}
+
+@keyframes merge-effect {
+    0% { transform: translateX(0); opacity: 1; }
+    25% { transform: translateX(-10px); opacity: 0.8; }
+    50% { transform: translateX(10px); opacity: 0.6; }
+    75% { transform: translateX(-5px); opacity: 0.8; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+/* 合併分支頁面樣式 */
+.merge-concept-intro {
+    background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.merge-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.merge-type {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.merge-type:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+}
+
+.merge-type h4 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.merge-simulator {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.merge-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+}
+
+.merge-visualization {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.scenario-display {
+    color: #6c757d;
+}
+
+.scenario-display h4 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+}
+
+.conflict-resolution {
+    background: linear-gradient(135deg, #fff5f5, #ffeaea);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 2px solid rgba(220, 53, 69, 0.2);
+}
+
+.conflict-example {
+    margin-top: 1.5rem;
+}
+
+.conflict-editor {
+    background: #2d3748;
+    color: #f7fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+
+.conflict-editor pre {
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.conflict-editor code {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.conflict-resolution-steps {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.conflict-resolution-steps ol {
+    margin: 0.5rem 0 0 1rem;
+    padding: 0;
+}
+
+.conflict-resolution-steps li {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.merge-best-practices {
+    background: linear-gradient(135deg, #f0fff4, #e6fffa);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 2px solid rgba(72, 187, 120, 0.2);
+}
+
+.practice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.practice-item {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.practice-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.practice-item i {
+    font-size: 2rem;
+    color: #48bb78;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.practice-item h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+}
+
+.practice-item p {
+    margin: 0;
+    color: #4a5568;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.completion-section {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 15px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.completion-section h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+}
+
+.completion-section ul {
+    text-align: left;
+    max-width: 400px;
+    margin: 1.5rem auto;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.completion-section li {
+    margin: 0.8rem 0;
+    font-size: 1.1rem;
+}
+
+.final-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .merge-types {
+        grid-template-columns: 1fr;
+    }
+    
+    .merge-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .practice-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .final-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* 合併模擬器的詳細樣式 */
+.merge-scenario {
+    text-align: center;
+    padding: 1rem;
+}
+
+.scenario-explanation {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 4px solid #667eea;
+}
+
+.merge-diagram {
+    margin: 2rem 0;
+    position: relative;
+}
+
+.commit-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.commit {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #667eea;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.commit.current {
+    background: #28a745;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.commit.merge {
+    background: #fd7e14;
+    box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3);
+}
+
+.branch-pointer {
+    background: #495057;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    position: absolute;
+    top: -50px;
+    transition: all 0.5s ease;
+}
+
+.branch-pointer.main {
+    background: #667eea;
+}
+
+.branch-pointer.feature {
+    background: #fd7e14;
+}
+
+.branch-pointer.moved {
+    transform: translateX(60px);
+}
+
+.merge-arrow {
+    font-size: 1.2rem;
+    color: #28a745;
+    font-weight: bold;
+    margin: 1rem 0;
+}
+
+.three-way {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    position: relative;
+}
+
+.main-line {
+    grid-column: 1;
+}
+
+.feature-line {
+    grid-column: 1;
+    margin-left: 2rem;
+}
+
+.scenario-commands {
+    background: #2d3748;
+    color: #f7fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    text-align: left;
+    margin-top: 1rem;
+}
+
+.scenario-commands code {
+    display: block;
+    margin: 0.3rem 0;
+    color: #4fd1c7;
+}
+
+.conflict-indicator {
+    background: #fff5f5;
+    border: 2px dashed #fc8181;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.conflict-file {
+    font-size: 1.2rem;
+    color: #e53e3e;
+    margin-bottom: 0.5rem;
+}
+
+.conflict-file i {
+    margin-right: 0.5rem;
+}
+
+.conflict-status {
+    color: #c53030;
+    font-weight: bold;
 }
