@@ -1,0 +1,9 @@
+# Wrangler configuration for git-tutorial-router Worker
+name = "git-tutorial-router"
+main = "worker.js"
+compatibility_date = "2025-07-04"
+
+# Route configuration
+[[routes]]
+pattern = "dev.musingfox.me/git-interactive-tutorial/*"
+zone_name = "musingfox.me"
