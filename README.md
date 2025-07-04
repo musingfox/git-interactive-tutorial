@@ -4,7 +4,7 @@
 
 ## 🚀 立即體驗
 
-**線上版本**：https://blog.musingfox.me/git-interactive-tutorial/
+**線上版本**：https://dev.musingfox.me/git-interactive-tutorial/
 
 **本地使用**：下載後開啟 `index.html` 即可開始學習
 
@@ -46,7 +46,7 @@
 ## 📱 使用方式
 
 ### 線上使用
-直接訪問：https://blog.musingfox.me/git-interactive-tutorial/
+直接訪問：https://dev.musingfox.me/git-interactive-tutorial/
 
 ### 本地使用
 1. 下載或複製此專案
